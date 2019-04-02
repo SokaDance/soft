@@ -1,5 +1,4 @@
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/execution_monitor.hpp>
+#include <gtest/gtest.h>
 
 #include "ecore/impl/AbstractResource.hpp"
 #include "ecore/impl/ResourceSet.hpp"
@@ -25,15 +24,13 @@ namespace
     };
 }
 
-BOOST_AUTO_TEST_SUITE( ResourceSetTests )
-
-BOOST_AUTO_TEST_CASE( Constructor )
+TEST( ResourceSetTests, Constructor )
 {
     auto resourceSet = std::make_shared<ResourceSet>();
     resourceSet->setThisPtr( resourceSet );
 }
 
-BOOST_AUTO_TEST_CASE( Resources_WithMock )
+TEST( ResourceSetTests, Resources_WithMock )
 {
     auto resourceSet = std::make_shared<ResourceSet>();
     resourceSet->setThisPtr( resourceSet );
@@ -43,7 +40,7 @@ BOOST_AUTO_TEST_CASE( Resources_WithMock )
     resources->add( resource );
 }
 
-BOOST_AUTO_TEST_CASE( Resources_NoMock )
+TEST( ResourceSetTests, Resources_NoMock )
 {
     auto resourceSet = std::make_shared<ResourceSet>();
     resourceSet->setThisPtr( resourceSet );
@@ -51,11 +48,9 @@ BOOST_AUTO_TEST_CASE( Resources_NoMock )
     auto resource = std::make_shared<Resource>();
     auto resources = resourceSet->getResources();
     resources->add( resource );
-    BOOST_CHECK_EQUAL( resource->getResourceSet(), resourceSet );
+    EXPECT_EQ( resource->getResourceSet(), resourceSet );
 
     resources->remove( resource );
-    BOOST_CHECK_EQUAL( resource->getResourceSet(), nullptr );
+    EXPECT_EQ( resource->getResourceSet(), nullptr );
 }
 
-
-BOOST_AUTO_TEST_SUITE_END()

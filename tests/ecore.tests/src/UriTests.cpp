@@ -1,5 +1,4 @@
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/execution_monitor.hpp>
+#include <gtest/gtest.h>
 
 #include "ecore\Stream.hpp"
 #include "ecore\Uri.hpp"
@@ -21,201 +20,197 @@ namespace std
     }
 } // namespace std
 
-BOOST_AUTO_TEST_SUITE( UriTests )
-
-BOOST_AUTO_TEST_CASE( Constructor )
+TEST( UriTests, Constructor )
 {
     Uri uri;
-    BOOST_CHECK_EQUAL( uri.getScheme(), "" );
-    BOOST_CHECK_EQUAL( uri.getHost(), "" );
-    BOOST_CHECK_EQUAL( uri.getPort(), 0 );
-    BOOST_CHECK_EQUAL( uri.getPath(), "" );
-    BOOST_CHECK_EQUAL( uri.getQuery(), "" );
-    BOOST_CHECK_EQUAL( uri.getFragment(), "" );
+    EXPECT_EQ( uri.getScheme(), "" );
+    EXPECT_EQ( uri.getHost(), "" );
+    EXPECT_EQ( uri.getPort(), 0 );
+    EXPECT_EQ( uri.getPath(), "" );
+    EXPECT_EQ( uri.getQuery(), "" );
+    EXPECT_EQ( uri.getFragment(), "" );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Scheme )
+TEST( UriTests, Constructor_Scheme )
 {
     Uri uri{"http://"};
-    BOOST_CHECK_EQUAL( uri.getScheme(), "http" );
+    EXPECT_EQ( uri.getScheme(), "http" );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Host )
+TEST( UriTests, Constructor_Host )
 {
     Uri uri{"http://host"};
-    BOOST_CHECK_EQUAL( uri.getScheme(), "http" );
-    BOOST_CHECK_EQUAL( uri.getHost(), "host" );
-    BOOST_CHECK_EQUAL( uri.getPort(), 0 );
+    EXPECT_EQ( uri.getScheme(), "http" );
+    EXPECT_EQ( uri.getHost(), "host" );
+    EXPECT_EQ( uri.getPort(), 0 );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_HostPort )
+TEST( UriTests, Constructor_HostPort )
 {
     Uri uri{"http://host:10020"};
-    BOOST_CHECK_EQUAL( uri.getScheme(), "http" );
-    BOOST_CHECK_EQUAL( uri.getHost(), "host" );
-    BOOST_CHECK_EQUAL( uri.getPort(), 10020 );
+    EXPECT_EQ( uri.getScheme(), "http" );
+    EXPECT_EQ( uri.getHost(), "host" );
+    EXPECT_EQ( uri.getPort(), 10020 );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Path )
+TEST( UriTests, Constructor_Path )
 {
     Uri uri{"http://host:10020/path/path2"};
-    BOOST_CHECK_EQUAL( uri.getScheme(), "http" );
-    BOOST_CHECK_EQUAL( uri.getHost(), "host" );
-    BOOST_CHECK_EQUAL( uri.getPort(), 10020 );
-    BOOST_CHECK_EQUAL( uri.getPath(), "/path/path2" );
+    EXPECT_EQ( uri.getScheme(), "http" );
+    EXPECT_EQ( uri.getHost(), "host" );
+    EXPECT_EQ( uri.getPort(), 10020 );
+    EXPECT_EQ( uri.getPath(), "/path/path2" );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_RelativePath )
+TEST( UriTests, Constructor_RelativePath )
 {
     Uri uri{"./path"};
-    BOOST_CHECK_EQUAL( uri.getScheme(), "" );
-    BOOST_CHECK_EQUAL( uri.getHost(), "" );
-    BOOST_CHECK_EQUAL( uri.getPath(), "./path" );
+    EXPECT_EQ( uri.getScheme(), "" );
+    EXPECT_EQ( uri.getHost(), "" );
+    EXPECT_EQ( uri.getPath(), "./path" );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Query )
+TEST( UriTests, Constructor_Query )
 {
     Uri uri{"http://host:10020/path/path2?key1=foo&key2=&key3&=bar&=bar="};
-    BOOST_CHECK_EQUAL( uri.getScheme(), "http" );
-    BOOST_CHECK_EQUAL( uri.getHost(), "host" );
-    BOOST_CHECK_EQUAL( uri.getPort(), 10020 );
-    BOOST_CHECK_EQUAL( uri.getPath(), "/path/path2" );
-    BOOST_CHECK_EQUAL( uri.getQuery(), "key1=foo&key2=&key3&=bar&=bar=" );
+    EXPECT_EQ( uri.getScheme(), "http" );
+    EXPECT_EQ( uri.getHost(), "host" );
+    EXPECT_EQ( uri.getPort(), 10020 );
+    EXPECT_EQ( uri.getPath(), "/path/path2" );
+    EXPECT_EQ( uri.getQuery(), "key1=foo&key2=&key3&=bar&=bar=" );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_QueryParameters )
+TEST( UriTests, Constructor_QueryParameters )
 {
     Uri uri{"http://host:10020/path/path2?key1=foo&key2=&key3&=bar&=bar="};
     std::vector<std::pair<std::string, std::string>> expected
         = {std::make_pair( "key1", "foo" ), std::make_pair( "key2", "" ), std::make_pair( "key3", "" )};
-    BOOST_CHECK_EQUAL( uri.getQueryParams(), expected );
+    EXPECT_EQ( uri.getQueryParams(), expected );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Fragment )
+TEST( UriTests, Constructor_Fragment )
 {
     {
         Uri uri{"http://host:10020/path/path2#fragment"};
-        BOOST_CHECK_EQUAL( uri.getFragment(), "fragment" );
+        EXPECT_EQ( uri.getFragment(), "fragment" );
     }
     {
         Uri uri{"//#fragment"};
-        BOOST_CHECK_EQUAL( uri.getScheme(), "" );
-        BOOST_CHECK_EQUAL( uri.getAuthority(), "" );
-        BOOST_CHECK_EQUAL( uri.getPath(), "" );
-        BOOST_CHECK_EQUAL( uri.getFragment(), "fragment" );
+        EXPECT_EQ( uri.getScheme(), "" );
+        EXPECT_EQ( uri.getAuthority(), "" );
+        EXPECT_EQ( uri.getPath(), "" );
+        EXPECT_EQ( uri.getFragment(), "fragment" );
     }
 }
 
 
-BOOST_AUTO_TEST_CASE( Equals_Empty )
+TEST( UriTests, Equals_Empty )
 {
     Uri uri1;
     Uri uri2;
-    BOOST_CHECK_EQUAL( uri1, uri2 );
+    EXPECT_EQ( uri1, uri2 );
 }
 
-BOOST_AUTO_TEST_CASE( IsAbsolute )
+TEST( UriTests, IsAbsolute )
 {
     {
         Uri uri{"http://toto"};
-        BOOST_CHECK( uri.isAbsolute() );
+        EXPECT_TRUE( uri.isAbsolute() );
     }
     {
         Uri uri{"/toto"};
-        BOOST_CHECK( !uri.isAbsolute() );
+        EXPECT_TRUE( !uri.isAbsolute() );
     }
 }
 
-BOOST_AUTO_TEST_CASE( IsOpaque )
+TEST( UriTests, IsOpaque )
 {
     {
         Uri uri{"http://toto"};
-        BOOST_CHECK( uri.isOpaque() );
+        EXPECT_TRUE( uri.isOpaque() );
     }
     {
         Uri uri{"http://toto/"};
-        BOOST_CHECK( !uri.isOpaque() );
+        EXPECT_TRUE( !uri.isOpaque() );
     }
 }
 
-BOOST_AUTO_TEST_CASE( Equals )
+TEST( UriTests, Equals )
 {
     Uri uri1{"http://host:10020/path/path2?key1=foo&key2=&key3&=bar&=bar="};
     Uri uri2{"http://host:10020/path/path2?key1=foo&key2=&key3&=bar&=bar="};
-    BOOST_CHECK_EQUAL( uri1, uri2 );
+    EXPECT_EQ( uri1, uri2 );
 }
 
-BOOST_AUTO_TEST_CASE( Difference )
+TEST( UriTests, Difference )
 {
     Uri uri1{"http://host:10020/path/path2?key1=foo&key2=&key3&=bar&=bar="};
     Uri uri2{};
-    BOOST_CHECK_NE( uri1, uri2 );
+    EXPECT_NE( uri1, uri2 );
 }
 
-BOOST_AUTO_TEST_CASE( Normalize )
+TEST( UriTests, Normalize )
 {
     {
         Uri uri{"http://host:10020/path/../path2"};
         Uri expected{"http://host:10020/path2"};
-        BOOST_CHECK_EQUAL( uri.normalize(), expected );
+        EXPECT_EQ( uri.normalize(), expected );
     }
     {
         Uri uri{"http://host:10020/./path"};
         Uri expected{"http://host:10020/path"};
-        BOOST_CHECK_EQUAL( uri.normalize(), expected );
+        EXPECT_EQ( uri.normalize(), expected );
     }
     {
         Uri uri{"http://host:10020/path/./path2"};
         Uri expected{"http://host:10020/path/path2"};
-        BOOST_CHECK_EQUAL( uri.normalize(), expected );
+        EXPECT_EQ( uri.normalize(), expected );
     }
 }
 
-BOOST_AUTO_TEST_CASE( Resolve )
+TEST( UriTests, Resolve )
 {
     {
         Uri uri{"http://host:10020/path/"};
         Uri uri2{"http://host:10020/path2/"};
-        BOOST_CHECK_EQUAL( uri.resolve( uri2 ), uri2 );
+        EXPECT_EQ( uri.resolve( uri2 ), uri2 );
     }
     {
         Uri uri{"http://host:10020/path/"};
         Uri uri2{"../path2"};
         Uri expected{"http://host:10020/path2"};
-        BOOST_CHECK_EQUAL( uri.resolve( uri2 ), expected );
+        EXPECT_EQ( uri.resolve( uri2 ), expected );
     }
     {
         Uri uri{"http://host:10020/path/"};
         Uri uri2{"/path2"};
         Uri expected{"http://host:10020/path2"};
-        BOOST_CHECK_EQUAL( uri.resolve( uri2 ), expected );
+        EXPECT_EQ( uri.resolve( uri2 ), expected );
     }
     {
         Uri uri{"http://host:10020/path/"};
         Uri uri2{"./path2"};
         Uri expected{"http://host:10020/path/path2"};
-        BOOST_CHECK_EQUAL( uri.resolve( uri2 ), expected );
+        EXPECT_EQ( uri.resolve( uri2 ), expected );
     }
 }
 
-BOOST_AUTO_TEST_CASE( Relativize )
+TEST( UriTests, Relativize )
 {
     {
         Uri uri{"http://host:10020/path/"};
         Uri uri2{"http://host:10020/path/path2"};
         Uri expected{"path2"};
-        BOOST_CHECK_EQUAL( uri.relativize( uri2 ), expected );
+        EXPECT_EQ( uri.relativize( uri2 ), expected );
     }
 }
 
-BOOST_AUTO_TEST_CASE( TrimFragment )
+TEST( UriTests, TrimFragment )
 {
     {
         Uri uri{"http://host:10020/path/#fragment"};
         Uri expected{"http://host:10020/path/"};
-        BOOST_CHECK_EQUAL( uri.trimFragment(), expected );
+        EXPECT_EQ( uri.trimFragment(), expected );
     }
 }
 
-
-BOOST_AUTO_TEST_SUITE_END()

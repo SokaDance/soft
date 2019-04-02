@@ -1,56 +1,54 @@
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/execution_monitor.hpp>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
+#include "ecore/EList.hpp"
 #include "ecore/EcoreFactory.hpp"
 #include "ecore/EcorePackage.hpp"
-#include "ecore/EList.hpp"
 #include "ecore/tests/MockClassifier.hpp"
 #include "ecore/tests/MockFactory.hpp"
 
 using namespace ecore;
 using namespace ecore::tests;
+using namespace testing;
 
-BOOST_AUTO_TEST_SUITE( EPackageTests )
-
-BOOST_AUTO_TEST_CASE( Constructor )
+TEST( EPackageTests, Constructor )
 {
     auto ecoreFactory = EcoreFactory::eInstance();
     auto ecorePackage = EcorePackage::eInstance();
 
     auto ePackage = ecoreFactory->createEPackage();
-    BOOST_CHECK( ePackage );
+    EXPECT_TRUE( ePackage );
 }
 
-BOOST_AUTO_TEST_CASE( Accessors_Attributes )
+TEST( EPackageTests, Accessors_Attributes )
 {
     auto ecoreFactory = EcoreFactory::eInstance();
     auto ecorePackage = EcorePackage::eInstance();
 
     auto ePackage = ecoreFactory->createEPackage();
     ePackage->setName( "ePackageName" );
-    BOOST_CHECK_EQUAL( ePackage->getName(), "ePackageName" );
+    EXPECT_EQ( ePackage->getName(), "ePackageName" );
 
     ePackage->setNsPrefix( "eNsPrefix" );
-    BOOST_CHECK_EQUAL( ePackage->getNsPrefix(), "eNsPrefix" );
+    EXPECT_EQ( ePackage->getNsPrefix(), "eNsPrefix" );
 
     ePackage->setNsURI( "eNsURI" );
-    BOOST_CHECK_EQUAL( ePackage->getNsURI(), "eNsURI" );
+    EXPECT_EQ( ePackage->getNsURI(), "eNsURI" );
 }
 
-BOOST_AUTO_TEST_CASE( Accessors_FactoryInstance )
+TEST( EPackageTests, Accessors_FactoryInstance )
 {
     auto ecoreFactory = EcoreFactory::eInstance();
     auto ecorePackage = EcorePackage::eInstance();
 
     auto ePackage = ecoreFactory->createEPackage();
     auto mockFactory = std::make_shared<MockFactory>();
-    MOCK_EXPECT( mockFactory->eInverseAdd ).with( ePackage, EcorePackage::EFACTORY__EPACKAGE, nullptr ).returns(nullptr);
+    EXPECT_CALL( *mockFactory, eInverseAdd( _, _, _ ) ).WillOnce( Return( nullptr ) );
     ePackage->setEFactoryInstance( mockFactory );
-    BOOST_CHECK_EQUAL( ePackage->getEFactoryInstance(), mockFactory );
+    EXPECT_EQ( ePackage->getEFactoryInstance(), mockFactory );
 }
 
-
-BOOST_AUTO_TEST_CASE( Accessors_Classifiers )
+TEST( EPackageTests, Accessors_Classifiers )
 {
     auto ecoreFactory = EcoreFactory::eInstance();
     auto ecorePackage = EcorePackage::eInstance();
@@ -59,26 +57,26 @@ BOOST_AUTO_TEST_CASE( Accessors_Classifiers )
 
     // add classifiers in the package
     auto eClassifier1 = std::make_shared<MockClassifier>();
+    std::string eClassifier1Name = "eClassifier1";
     auto eClassifier2 = std::make_shared<MockClassifier>();
+    std::string eClassifier2Name = "eClassifier2";
     auto eClassifier3 = std::make_shared<MockClassifier>();
-    MOCK_EXPECT( eClassifier1->getName ).returns( "eClassifier1" );
-    MOCK_EXPECT( eClassifier1->eInverseAdd ).with( ePackage , EcorePackage::ECLASSIFIER__EPACKAGE , nullptr ).returns(nullptr);
-    MOCK_EXPECT( eClassifier2->getName ).returns( "eClassifier2" );
-    MOCK_EXPECT( eClassifier2->eInverseAdd ).with( ePackage, EcorePackage::ECLASSIFIER__EPACKAGE , nullptr ).returns( nullptr );
-    MOCK_EXPECT( eClassifier3->getName ).returns( "eClassifier3" );
-    MOCK_EXPECT( eClassifier3->eInverseAdd ).with( ePackage, EcorePackage::ECLASSIFIER__EPACKAGE, nullptr ).returns( nullptr );
+    std::string eClassifier3Name = "eClassifier3";
+    EXPECT_CALL( *eClassifier1, getName() ).WillRepeatedly( ReturnRef( eClassifier1Name ) );
+    EXPECT_CALL( *eClassifier1, eInverseAdd( _, _, _ ) ).WillOnce( Return( nullptr ) );
+    EXPECT_CALL( *eClassifier2, getName() ).WillRepeatedly( ReturnRef( eClassifier2Name ) );
+    EXPECT_CALL( *eClassifier2, eInverseAdd( _, _, _ ) ).WillOnce( Return( nullptr ) );
+    EXPECT_CALL( *eClassifier3, getName() ).WillRepeatedly( ReturnRef( eClassifier3Name ) );
+    EXPECT_CALL( *eClassifier3, eInverseAdd( _, _, _ ) ).WillOnce( Return( nullptr ) );
     ePackage->getEClassifiers()->add( eClassifier1 );
     ePackage->getEClassifiers()->add( eClassifier2 );
 
     // retrieve them in the package
-    BOOST_CHECK_EQUAL( ePackage->getEClassifier( "eClassifier1" ), eClassifier1 );
-    BOOST_CHECK_EQUAL( ePackage->getEClassifier( "eClassifier2" ), eClassifier2 );
+    EXPECT_EQ( ePackage->getEClassifier( eClassifier1Name ), eClassifier1 );
+    EXPECT_EQ( ePackage->getEClassifier( eClassifier2Name ), eClassifier2 );
 
     // ensure that even if we add it after getting previous ones , the cache inside
     // package is still valid
     ePackage->getEClassifiers()->add( eClassifier3 );
-    BOOST_CHECK_EQUAL( ePackage->getEClassifier( "eClassifier3" ), eClassifier3 );
+    EXPECT_EQ( ePackage->getEClassifier( eClassifier3Name ), eClassifier3 );
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

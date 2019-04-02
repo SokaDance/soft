@@ -1,4 +1,5 @@
-#include <boost/test/auto_unit_test.hpp>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "ecore/Stream.hpp"
 #include "ecore/impl/Notification.hpp"
@@ -11,6 +12,7 @@
 using namespace ecore;
 using namespace ecore::impl;
 using namespace ecore::tests;
+using namespace testing;
 
 namespace std
 {
@@ -21,81 +23,79 @@ namespace std
     }
 
 }
-BOOST_AUTO_TEST_SUITE( NotificationTests )
-
-BOOST_AUTO_TEST_CASE( Constructor )
+TEST( NotificationTests, Constructor )
 {
     std::shared_ptr<MockObject> notifier = std::make_shared<MockObject>();
     std::shared_ptr<MockStructuralFeature> feature = std::make_shared<MockStructuralFeature>();
     {
         auto notification = std::make_shared<Notification>( notifier, ENotification::ADD, feature, 1, 2 );
-        BOOST_CHECK_EQUAL( notification->getEventType(), ENotification::ADD );
-        BOOST_CHECK_EQUAL( notification->getNotifier(), notifier );
-        BOOST_CHECK_EQUAL( notification->getFeature(), feature );
-        BOOST_CHECK_EQUAL( notification->getOldValue(), 1 );
-        BOOST_CHECK_EQUAL( notification->getNewValue(), 2 );
-        BOOST_CHECK_EQUAL( notification->getPosition(), -1 );
+        EXPECT_EQ( notification->getEventType(), ENotification::ADD );
+        EXPECT_EQ( notification->getNotifier(), notifier );
+        EXPECT_EQ( notification->getFeature(), feature );
+        EXPECT_EQ( notification->getOldValue(), 1 );
+        EXPECT_EQ( notification->getNewValue(), 2 );
+        EXPECT_EQ( notification->getPosition(), -1 );
     }
     {
         auto notification = std::make_shared<Notification>( notifier, ENotification::ADD, feature, 1, 2, 10 );
-        BOOST_CHECK_EQUAL( notification->getEventType(), ENotification::ADD );
-        BOOST_CHECK_EQUAL( notification->getNotifier(), notifier );
-        BOOST_CHECK_EQUAL( notification->getFeature(), feature );
-        BOOST_CHECK_EQUAL( notification->getOldValue(), 1 );
-        BOOST_CHECK_EQUAL( notification->getNewValue(), 2 );
-        BOOST_CHECK_EQUAL( notification->getPosition(), 10 );
+        EXPECT_EQ( notification->getEventType(), ENotification::ADD );
+        EXPECT_EQ( notification->getNotifier(), notifier );
+        EXPECT_EQ( notification->getFeature(), feature );
+        EXPECT_EQ( notification->getOldValue(), 1 );
+        EXPECT_EQ( notification->getNewValue(), 2 );
+        EXPECT_EQ( notification->getPosition(), 10 );
     }
 }
 
-BOOST_AUTO_TEST_CASE( Dispatch )
+TEST( NotificationTests, Dispatch )
 {
     std::shared_ptr<MockObject> notifier = std::make_shared<MockObject>();
     std::shared_ptr<MockStructuralFeature> feature = std::make_shared<MockStructuralFeature>();
     {
         auto notification = std::make_shared<Notification>( notifier, ENotification::ADD, feature, 1, 2 );
-        MOCK_EXPECT( notifier->eNotify ).with( notification ).once();
+        EXPECT_CALL( *notifier , eNotify(Eq(notification)) );
         notification->dispatch();
     }
 }
 
-BOOST_AUTO_TEST_CASE( Merge )
+TEST( NotificationTests, Merge )
 {
     std::shared_ptr<MockObject> notifier = std::make_shared<MockObject>();
     std::shared_ptr<MockStructuralFeature> feature = std::make_shared<MockStructuralFeature>();
-    MOCK_EXPECT( feature->getFeatureID ).returns( 1 );
+    EXPECT_CALL( *feature, getFeatureID() ).WillRepeatedly( Return( 1 ) );
     {
         auto notification = std::make_shared<Notification>( notifier, ENotification::SET, 1, 1, 2 );
         auto other = std::make_shared<Notification>( notifier, ENotification::SET, 1, 2, 3 );
-        BOOST_CHECK( notification->merge( other ) );
-        BOOST_CHECK_EQUAL( notification->getEventType(), ENotification::SET );
-        BOOST_CHECK_EQUAL( notification->getOldValue(), 1 );
-        BOOST_CHECK_EQUAL( notification->getNewValue(), 3 );
+        EXPECT_TRUE( notification->merge( other ) );
+        EXPECT_EQ( notification->getEventType(), ENotification::SET );
+        EXPECT_EQ( notification->getOldValue(), 1 );
+        EXPECT_EQ( notification->getNewValue(), 3 );
     }
     {
         auto notification = std::make_shared<Notification>( notifier, ENotification::SET, feature, 1, 2 );
         auto other = std::make_shared<Notification>( notifier, ENotification::UNSET, feature, 2, 0 );
-        BOOST_CHECK( notification->merge( other ) );
-        BOOST_CHECK_EQUAL( notification->getEventType(), ENotification::SET );
-        BOOST_CHECK_EQUAL( notification->getOldValue(), 1 );
-        BOOST_CHECK_EQUAL( notification->getNewValue(), 0 );
+        EXPECT_TRUE( notification->merge( other ) );
+        EXPECT_EQ( notification->getEventType(), ENotification::SET );
+        EXPECT_EQ( notification->getOldValue(), 1 );
+        EXPECT_EQ( notification->getNewValue(), 0 );
     }
     {
         auto notification = std::make_shared<Notification>( notifier, ENotification::UNSET, feature, 1, 0 );
         auto other = std::make_shared<Notification>( notifier, ENotification::SET, feature, 0, 2 );
-        BOOST_CHECK( notification->merge( other ) );
-        BOOST_CHECK_EQUAL( notification->getEventType(), ENotification::SET );
-        BOOST_CHECK_EQUAL( notification->getOldValue(), 1 );
-        BOOST_CHECK_EQUAL( notification->getNewValue(), 2 );
+        EXPECT_TRUE( notification->merge( other ) );
+        EXPECT_EQ( notification->getEventType(), ENotification::SET );
+        EXPECT_EQ( notification->getOldValue(), 1 );
+        EXPECT_EQ( notification->getNewValue(), 2 );
     }
     {
         auto obj1 = std::make_shared<MockObject>();
         auto obj2 = std::make_shared<MockObject>();
         auto notification = std::make_shared<Notification>( notifier, ENotification::REMOVE, feature, obj1, NO_VALUE, 2 );
         auto other = std::make_shared<Notification>( notifier, ENotification::REMOVE, feature, obj2, NO_VALUE, 2 );
-        BOOST_CHECK( notification->merge( other ) );
-        BOOST_CHECK_EQUAL( notification->getEventType(), ENotification::REMOVE_MANY );
-        BOOST_CHECK_EQUAL( notification->getOldValue(), std::vector<Any>( { obj1 , obj2 } ) );
-        BOOST_CHECK_EQUAL( notification->getNewValue() , std::vector<std::size_t>( { 2, 3 } ) );
+        EXPECT_TRUE( notification->merge( other ) );
+        EXPECT_EQ( notification->getEventType(), ENotification::REMOVE_MANY );
+        EXPECT_EQ( notification->getOldValue(), std::vector<Any>( { obj1 , obj2 } ) );
+        EXPECT_EQ( notification->getNewValue() , std::vector<std::size_t>( { 2, 3 } ) );
     }
     {
         auto obj1 = std::make_shared<MockObject>();
@@ -103,35 +103,35 @@ BOOST_AUTO_TEST_CASE( Merge )
         auto obj3 = std::make_shared<MockObject>();
         auto notification = std::make_shared<Notification>( notifier, ENotification::REMOVE_MANY, feature, std::vector<Any>( { obj1 , obj2 } ), std::vector<std::size_t>( { 2, 3 } ) );
         auto other = std::make_shared<Notification>( notifier, ENotification::REMOVE, feature, obj3, NO_VALUE, 2 );
-        BOOST_CHECK( notification->merge( other ) );
-        BOOST_CHECK_EQUAL( notification->getEventType(), ENotification::REMOVE_MANY );
-        BOOST_CHECK_EQUAL( notification->getOldValue(), std::vector<Any>( { obj1 , obj2 , obj3 } ) );
-        BOOST_CHECK_EQUAL( notification->getNewValue(), std::vector<std::size_t>( { 2,3,4 } ) );
+        EXPECT_TRUE( notification->merge( other ) );
+        EXPECT_EQ( notification->getEventType(), ENotification::REMOVE_MANY );
+        EXPECT_EQ( notification->getOldValue(), std::vector<Any>( { obj1 , obj2 , obj3 } ) );
+        EXPECT_EQ( notification->getNewValue(), std::vector<std::size_t>( { 2,3,4 } ) );
     }
 }
 
-BOOST_AUTO_TEST_CASE( Add )
+TEST( NotificationTests, Add )
 {
     std::shared_ptr<MockObject> notifier = std::make_shared<MockObject>();
     std::shared_ptr<MockStructuralFeature> feature = std::make_shared<MockStructuralFeature>();
-    MOCK_EXPECT( feature->getFeatureID ).returns( 1 );
+    EXPECT_CALL( *feature, getFeatureID() ).WillRepeatedly( Return( 1 ) );
     {
         auto notification = std::make_shared<Notification>( notifier, ENotification::SET, feature, 1, 2 );
-        BOOST_CHECK( !notification->add( nullptr ) );
+        EXPECT_FALSE( notification->add( nullptr ) );
     }
     {
         auto notification = std::make_shared<Notification>( notifier, ENotification::SET, feature, 1, 2 );
         auto other = std::make_shared<Notification>( notifier, ENotification::SET, feature, 1, 2 );
-        BOOST_CHECK( !notification->add( other ) );
+        EXPECT_FALSE( notification->add( other ) );
     }
     {
         auto obj1 = std::make_shared<MockObject>();
         auto obj2 = std::make_shared<MockObject>();
         auto notification = std::make_shared<Notification>( notifier, ENotification::ADD, feature, NO_VALUE, obj1 );
         auto other = std::make_shared<Notification>( notifier, ENotification::ADD, feature, NO_VALUE, obj2 );
-        BOOST_CHECK( notification->add( other ) );
-        MOCK_EXPECT( notifier->eNotify ).with( notification ).once();
-        MOCK_EXPECT( notifier->eNotify ).with( other ).once();
+        EXPECT_TRUE( notification->add( other ) );
+        EXPECT_CALL( *notifier, eNotify( Eq( notification ) ) );
+        EXPECT_CALL( *notifier, eNotify( Eq( other ) ) );
         notification->dispatch();
     }
     {
@@ -140,16 +140,12 @@ BOOST_AUTO_TEST_CASE( Add )
         auto notification = std::make_shared<Notification>( notifier, ENotification::ADD, feature, NO_VALUE, obj1 );
         auto other = std::make_shared<MockNotification>();
         auto otherNotifier = std::make_shared<MockNotifier>();
-        MOCK_EXPECT( other->getEventType ).returns( ENotification::SET );
-        MOCK_EXPECT( other->getNotifier ).returns( otherNotifier );
-        MOCK_EXPECT( other->getFeature ).returns( feature );
-        BOOST_CHECK( notification->add( other ) );
-        MOCK_EXPECT( notifier->eNotify ).with( notification ).once();
-        MOCK_EXPECT( otherNotifier->eNotify ).with( other ).once();
+        EXPECT_CALL( *other, getEventType() ).WillOnce( Return( ENotification::SET ) );
+        EXPECT_CALL( *other, getNotifier() ).WillOnce( Return( otherNotifier ) );
+        EXPECT_CALL( *other, getFeature() ).WillOnce( Return( feature ) );
+        EXPECT_TRUE( notification->add( other ) );
+        EXPECT_CALL( *notifier, eNotify( Eq( notification ) ) );
+        EXPECT_CALL( *otherNotifier, eNotify( Eq( other ) ) );
         notification->dispatch();
     }
-
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

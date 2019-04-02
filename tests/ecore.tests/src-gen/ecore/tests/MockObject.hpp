@@ -25,30 +25,38 @@ namespace ecore::tests
     {
     public:
         typedef EObject base_type;
-        MOCK_METHOD(eClass ,0) 
-        MOCK_METHOD(eIsProxy ,0) 
-        MOCK_METHOD(eResource ,0) 
-        MOCK_METHOD(eContainer ,0) 
-        MOCK_METHOD(eContainingFeature ,0) 
-        MOCK_METHOD(eContainmentFeature ,0) 
-        MOCK_METHOD(eContents ,0) 
-        MOCK_METHOD(eAllContents ,0) 
-        MOCK_METHOD(eCrossReferences ,0) 
-        MOCK_METHOD_EXT(eGet ,1, ecore::Any(const std::shared_ptr<ecore::EStructuralFeature>&), eGet_EStructuralFeature) 
-        MOCK_METHOD_EXT(eGet ,2, ecore::Any(const std::shared_ptr<ecore::EStructuralFeature>&,bool), eGet_EStructuralFeature_EBoolean) 
-        MOCK_METHOD(eSet ,2) 
-        MOCK_METHOD(eIsSet ,1) 
-        MOCK_METHOD(eUnset ,1) 
-        MOCK_METHOD(eInvoke ,2) 
+        MOCK_CONST_METHOD0(eClass, std::shared_ptr<ecore::EClass>() );
+        MOCK_CONST_METHOD0(eIsProxy, bool() );
+        MOCK_CONST_METHOD0(eResource, std::shared_ptr<ecore::EResource>() );
+        MOCK_CONST_METHOD0(eContainer, std::shared_ptr<ecore::EObject>() );
+        MOCK_CONST_METHOD0(eContainingFeature, std::shared_ptr<ecore::EStructuralFeature>() );
+        MOCK_CONST_METHOD0(eContainmentFeature, std::shared_ptr<ecore::EReference>() );
+        MOCK_CONST_METHOD0(eContents, std::shared_ptr<const EList<std::shared_ptr<ecore::EObject>>>() );
+        MOCK_CONST_METHOD0(eAllContents, std::shared_ptr<const ECollectionView<std::shared_ptr<ecore::EObject>>>() );
+        MOCK_CONST_METHOD0(eCrossReferences, std::shared_ptr<const EList<std::shared_ptr<ecore::EObject>>>() );
+        MOCK_CONST_METHOD1(eGet, ecore::Any(const std::shared_ptr<ecore::EStructuralFeature>&) );
+        MOCK_CONST_METHOD2(eGet, ecore::Any(const std::shared_ptr<ecore::EStructuralFeature>&,bool) );
+        MOCK_METHOD2(eSet, void(const std::shared_ptr<ecore::EStructuralFeature>&,const ecore::Any&) );
+        MOCK_CONST_METHOD1(eIsSet, bool(const std::shared_ptr<ecore::EStructuralFeature>&) );
+        MOCK_METHOD1(eUnset, void(const std::shared_ptr<ecore::EStructuralFeature>&) );
+        MOCK_METHOD2(eInvoke, ecore::Any(const std::shared_ptr<ecore::EOperation>&,const std::shared_ptr<EList<ecore::Any>>&) );
         
         
         // Start of user code MockObject
-        MOCK_METHOD( eSetResource, 2 )
-        MOCK_METHOD( eInverseAdd, 3 )
-        MOCK_METHOD( eInverseRemove, 3 )
-        MOCK_METHOD( eProxyUri, 0 )
-        MOCK_METHOD( eSetProxyURI, 1 )
-        MOCK_METHOD( eResolveProxy, 1)
+        MOCK_METHOD2( eSetResource,
+                      std::shared_ptr<ENotificationChain>( const std::shared_ptr<EResource>&,
+                                                           const std::shared_ptr<ENotificationChain>& ) );
+        MOCK_METHOD3( eInverseAdd,
+                      std::shared_ptr<ENotificationChain>( const std::shared_ptr<EObject>&,
+                                                           int,
+                                                           const std::shared_ptr<ENotificationChain>& ) );
+        MOCK_METHOD3( eInverseRemove,
+                      std::shared_ptr<ENotificationChain>( const std::shared_ptr<EObject>&,
+                                                           int,
+                                                           const std::shared_ptr<ENotificationChain>& ) );
+        MOCK_CONST_METHOD0( eProxyUri, Uri() );
+        MOCK_METHOD1( eSetProxyURI, void( const Uri& ) );
+        MOCK_CONST_METHOD1( eResolveProxy, std::shared_ptr<EObject>( const std::shared_ptr<EObject>& ) );
         // End of user code
     };
 } 

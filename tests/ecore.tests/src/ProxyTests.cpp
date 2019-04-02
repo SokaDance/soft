@@ -1,5 +1,5 @@
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/execution_monitor.hpp>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "ecore\tests\MockObject.hpp"
 #include "ecore\impl\Proxy.hpp"
@@ -7,33 +7,28 @@
 using namespace ecore;
 using namespace ecore::impl;
 using namespace ecore::tests;
+using namespace testing;
 
-BOOST_AUTO_TEST_SUITE( ProxyTests )
-
-BOOST_AUTO_TEST_CASE( SetGeT_NoProxy )
+TEST( ProxyTests, SetGet_NoProxy )
 {
     auto mockOwner = std::make_shared<MockObject>();
     auto mockObject = std::make_shared<MockObject>();
     Proxy<std::shared_ptr<EObject>> proxy( mockOwner, 1 );
-    MOCK_EXPECT( mockObject->eIsProxy ).returns( false );
+    EXPECT_CALL( *mockObject , eIsProxy() ).WillRepeatedly( Return(false) );
     proxy.set( mockObject );
-    BOOST_CHECK_EQUAL( proxy.get(), mockObject );
+    EXPECT_EQ( proxy.get(), mockObject );
 }
 
-BOOST_AUTO_TEST_CASE( SetGeT_WithProxy )
+TEST( ProxyTests, SetGet_WithProxy )
 {
     auto mockOwner = std::make_shared<MockObject>();
     auto mockProxy = std::make_shared<MockObject>();
     auto mockResolved = std::make_shared<MockObject>();
     Proxy<std::shared_ptr<EObject>> proxy( mockOwner, 1 );
-    MOCK_EXPECT( mockProxy->eIsProxy ).returns( true );
+    EXPECT_CALL( *mockProxy, eIsProxy() ).WillRepeatedly( Return( true ) );
     proxy.set( mockProxy );
 
-    MOCK_EXPECT( mockOwner->eDeliver ).returns( false );
-    MOCK_EXPECT( mockOwner->eResolveProxy ).with( mockProxy ).returns( mockResolved );
-    BOOST_CHECK_EQUAL( proxy.get(), mockResolved );
+    EXPECT_CALL( *mockOwner, eDeliver() ).WillRepeatedly( Return( false ) );
+    EXPECT_CALL( *mockOwner, eResolveProxy( Eq( mockProxy ) ) ).WillRepeatedly( Return( mockResolved ) );
+    EXPECT_EQ( proxy.get(), mockResolved );
 }
-
-
-
-BOOST_AUTO_TEST_SUITE_END()

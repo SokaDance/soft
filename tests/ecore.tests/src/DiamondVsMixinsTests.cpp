@@ -1,5 +1,4 @@
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/execution_monitor.hpp>
+#include <gtest/gtest.h>
 #include <memory>
 #include <iostream>
 #include <chrono>
@@ -7,6 +6,7 @@
 const int NB_ITERATIONS = 1000000;
 
 #define LOG 0
+//#define BENCHMARK
 
 namespace diamond
 {
@@ -192,9 +192,7 @@ namespace mixins
 
 }
 
-BOOST_AUTO_TEST_SUITE( DiamondVsMixinsTests )
-
-BOOST_AUTO_TEST_CASE( Performance )
+TEST( DiamondVsMixinsTests , Performance )
 {
 #ifdef BENCHMARK
     long long diamondTimes, mixinTimes;
@@ -204,7 +202,7 @@ BOOST_AUTO_TEST_CASE( Performance )
         for (int i = 0; i < NB_ITERATIONS; ++i)
         {
             auto d = std::dynamic_pointer_cast<diamond::ID>(a);
-            BOOST_CHECK( d );
+            EXPECT_TRUE( d );
         }
         auto end = std::chrono::steady_clock::now();
         diamondTimes = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -218,7 +216,7 @@ BOOST_AUTO_TEST_CASE( Performance )
         for (int i = 0; i < NB_ITERATIONS; ++i)
         {
             auto d = std::static_pointer_cast<mixins::ID>(a);
-            BOOST_CHECK( d );
+            EXPECT_TRUE( d );
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         mixinTimes = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -226,14 +224,14 @@ BOOST_AUTO_TEST_CASE( Performance )
         std::cout << "Mixins:" << mixinTimes << " us" << std::endl;
 #endif
     }
-    BOOST_CHECK_GE( diamondTimes, mixinTimes );
+    EXPECT_GE( diamondTimes, mixinTimes );
     {
         std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
         std::shared_ptr<diamond::IA> a = std::make_shared<diamond::D>();
         for (int i = 0; i < NB_ITERATIONS; ++i)
         {
             auto d = std::dynamic_pointer_cast<diamond::D>(a);
-            BOOST_CHECK( d );
+            EXPECT_TRUE( d );
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         diamondTimes = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -247,7 +245,7 @@ BOOST_AUTO_TEST_CASE( Performance )
         for (int i = 0; i < NB_ITERATIONS; ++i)
         {
             auto d = std::static_pointer_cast<mixins::D>(a);
-            BOOST_CHECK( d );
+            EXPECT_TRUE( d );
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         mixinTimes = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -255,14 +253,14 @@ BOOST_AUTO_TEST_CASE( Performance )
         std::cout << "Mixins:" << mixinTimes << " us" << std::endl;
 #endif
     }
-    BOOST_CHECK_GE( diamondTimes, mixinTimes );
+    EXPECT_GE( diamondTimes, mixinTimes );
     {
         std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
         std::shared_ptr<diamond::IA> a = std::make_shared<diamond::E>();
         for (int i = 0; i < NB_ITERATIONS; ++i)
         {
             auto ie = std::dynamic_pointer_cast<diamond::IE>(a);
-            BOOST_CHECK( ie );
+            EXPECT_TRUE( ie );
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         diamondTimes = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -277,7 +275,7 @@ BOOST_AUTO_TEST_CASE( Performance )
         {
             auto e = std::static_pointer_cast<mixins::E>(a);
             auto ie = std::static_pointer_cast<mixins::IE>(e);
-            BOOST_CHECK( ie );
+            EXPECT_TRUE( ie );
         }
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         mixinTimes = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -285,10 +283,9 @@ BOOST_AUTO_TEST_CASE( Performance )
         std::cout << "Mixins:" << mixinTimes << " us" << std::endl;
 #endif
     }
-    BOOST_CHECK_GE( diamondTimes, mixinTimes );
+    EXPECT_GE( diamondTimes, mixinTimes );
 
 #endif
 }
 
-BOOST_AUTO_TEST_SUITE_END()
 

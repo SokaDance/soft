@@ -1,4 +1,6 @@
-#include <boost/test/auto_unit_test.hpp>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
 
 #include "ecore/Constants.hpp"
 #include "ecore/EPackage.hpp"
@@ -12,6 +14,7 @@
 #include "ecore/EDataType.hpp"
 
 using namespace ecore;
+using namespace testing;
 
 /*
     Inspired from Example of Dynamic Model : https://www.ibm.com/developerworks/library/os-eclipse-dynamicemf/
@@ -19,11 +22,11 @@ using namespace ecore;
 
 namespace
 {
-    class BookStoreModelFixture
+    class BookStoreModelTests : public Test
     {
     public:
 
-        BookStoreModelFixture()
+        BookStoreModelTests()
         {
             auto ecoreFactory = EcoreFactory::eInstance();
             auto ecorePackage = EcorePackage::eInstance();
@@ -117,10 +120,7 @@ namespace
 
 }
 
-BOOST_AUTO_TEST_SUITE( EDynamicModelTests )
-
-
-BOOST_FIXTURE_TEST_CASE( InstanciateModel , BookStoreModelFixture )
+TEST_F( BookStoreModelTests, InstanciateModel )
 {
     /*
     * Obtain EFactory instance from BookStoreEPackage
@@ -167,5 +167,3 @@ BOOST_FIXTURE_TEST_CASE( InstanciateModel , BookStoreModelFixture )
     auto strISBN = anyCast<int>( anyISBN );
 
 }
-
-BOOST_AUTO_TEST_SUITE_END()

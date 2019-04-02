@@ -1,5 +1,5 @@
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/execution_monitor.hpp>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "ecore/EAdapter.hpp"
 #include "ecore/impl/EObjectEList.hpp"
@@ -12,44 +12,39 @@
 using namespace ecore;
 using namespace ecore::impl;
 using namespace ecore::tests;
+using namespace testing;
 
 namespace
 {
-    class AddFixture
+    class EObjectEListTests : public Test
     {
     public:
-        AddFixture( bool notifications = false )
+        EObjectEListTests( bool notifications = false )
             : owner( new MockObject() )
             , object( new MockObject() )
         {
-            MOCK_EXPECT( owner->eDeliver ).returns( notifications );
+            EXPECT_CALL( *owner, eDeliver() ).WillRepeatedly( Return( notifications ) );
         }
 
         std::shared_ptr<MockObject> owner;
         std::shared_ptr<MockObject> object;
     };
 
-    class AddFixtureNotifications : public AddFixture
+    class EObjectEListTests_Notifications : public EObjectEListTests
     {
     public:
-        AddFixtureNotifications()
-            : AddFixture(true)
+        EObjectEListTests_Notifications()
+            : EObjectEListTests( true )
             , mockClass( new MockClass())
             , mockFeature( new MockStructuralFeature())
             , mockAdapters( new MockList<EAdapter*>() )
         {
-            MOCK_EXPECT( mockClass->getEStructuralFeature_EInt ).with( 1 ).returns( mockFeature );
-            MOCK_EXPECT( mockAdapters->empty ).returns( false );
-            MOCK_EXPECT( owner->eClass ).returns( mockClass );
-            MOCK_EXPECT( owner->eAdapters ).returns( boost::ref( *mockAdapters ) );
-            MOCK_EXPECT( owner->eNotify ).with( [ = ]( const std::shared_ptr<ENotification>& n )
-            {
-                return n->getNotifier() == owner
-                    && n->getFeature() == mockFeature
-                    && n->getOldValue().empty()
-                    && anyCast<std::shared_ptr<EObject>>( n->getNewValue() ) == object
-                    && n->getPosition() == 0;
-            } ).once();
+            EXPECT_CALL( *mockClass, getEStructuralFeature( 1 ) ).WillRepeatedly( Return(mockFeature) );
+            EXPECT_CALL( *mockAdapters, empty() ).WillRepeatedly( Return( false ) );
+            EXPECT_CALL( *owner, eClass() ).WillRepeatedly( Return(  mockClass ) );
+            EXPECT_CALL( *owner , eAdapters() ).WillRepeatedly( ReturnRef( *mockAdapters ) );
+            EXPECT_CALL( *owner,
+                         eNotify( _ ) );
         }
 
         std::shared_ptr<MockClass> mockClass;
@@ -59,11 +54,8 @@ namespace
 
 }
 
-BOOST_AUTO_TEST_SUITE( EObjectEListTests )
-
-BOOST_AUTO_TEST_CASE( Constructor )
+TEST_F( EObjectEListTests,  Constructor )
 {
-    auto object = std::make_shared<MockObject>();
     {
         EObjectEList< std::shared_ptr<EObject> > list(object,0,1);
     }
@@ -84,90 +76,85 @@ BOOST_AUTO_TEST_CASE( Constructor )
     }
 }
 
-BOOST_FIXTURE_TEST_CASE( Add_SimpleNoNotifications , AddFixture )
+TEST_F( EObjectEListTests , Add )
 {
     EObjectEList<std::shared_ptr<EObject>> list( owner, 1, 2 );
-    BOOST_CHECK( list.add( object ) );
-    BOOST_CHECK_EQUAL( list.size(), 1 );
-    BOOST_CHECK_EQUAL( list.get( 0 ), object );
-    BOOST_CHECK( !list.add( object ) );
+    EXPECT_TRUE( list.add( object ) );
+    EXPECT_EQ( list.size(), 1 );
+    EXPECT_EQ( list.get( 0 ), object );
+    EXPECT_FALSE( list.add( object ) );
 }
 
-BOOST_FIXTURE_TEST_CASE( Add_SimpleNotifications, AddFixtureNotifications )
+TEST_F( EObjectEListTests_Notifications, Add )
 {
     EObjectEList<std::shared_ptr<EObject>> list( owner, 1, 2 );
-    BOOST_CHECK(list.add( object ));
-    BOOST_CHECK_EQUAL( list.size(), 1 );
-    BOOST_CHECK_EQUAL( list.get( 0 ), object );
-    BOOST_CHECK( !list.add( object ) );
+    EXPECT_TRUE( list.add( object ) );
+    EXPECT_EQ( list.size(), 1 );
+    EXPECT_EQ( list.get( 0 ), object );
+    EXPECT_FALSE( list.add( object ) );
 }
 
-BOOST_FIXTURE_TEST_CASE( Add_InverseNoNotifications, AddFixture )
+TEST_F( EObjectEListTests, AddInverse )
 {
-    MOCK_EXPECT( object->eInverseAdd ).with( owner, -2, nullptr ).once().returns( nullptr );
-
+    EXPECT_CALL( *object, eInverseAdd( Eq(owner), Eq(-2), Eq(nullptr) )).WillOnce( Return( nullptr ) );
     EObjectEList<std::shared_ptr<EObject>, false, true, false> list( owner, 1, 2 );
-    BOOST_CHECK( list.add( object ) );
-    BOOST_CHECK_EQUAL( list.size(), 1 );
-    BOOST_CHECK_EQUAL( list.get( 0 ), object );
-    BOOST_CHECK( !list.add( object ) );
+    EXPECT_TRUE( list.add( object ) );
+    EXPECT_EQ( list.size(), 1 );
+    EXPECT_EQ( list.get( 0 ), object );
+    EXPECT_FALSE( list.add( object ) );
 }
 
-BOOST_FIXTURE_TEST_CASE( Add_InverseNotifications, AddFixtureNotifications )
+TEST_F( EObjectEListTests_Notifications , AddInverse )
 {
-    MOCK_EXPECT( object->eInverseAdd ).with( owner, -2, nullptr ).once().returns( nullptr );
+    EXPECT_CALL( *object, eInverseAdd( Eq( owner ) , Eq(-2), Eq(nullptr) )).WillOnce( Return( nullptr ) );
     EObjectEList<std::shared_ptr<EObject>, false, true, false> list( owner, 1, 2 );
-    BOOST_CHECK( list.add( object ) );
-    BOOST_CHECK_EQUAL( list.size(), 1 );
-    BOOST_CHECK_EQUAL( list.get( 0 ), object );
-    BOOST_CHECK( !list.add( object ) );
+    EXPECT_TRUE( list.add( object ) );
+    EXPECT_EQ( list.size(), 1 );
+    EXPECT_EQ( list.get( 0 ), object );
+    EXPECT_FALSE( list.add( object ) );
 }
 
 
-BOOST_FIXTURE_TEST_CASE( Add_InverseOppositeNoNotifications , AddFixture )
+TEST_F( EObjectEListTests , AddInverseOpposite )
 {
-    MOCK_EXPECT( object->eInverseAdd ).with( owner, 2, nullptr ).once().returns( nullptr );
-
+    EXPECT_CALL( *object, eInverseAdd( Eq( owner ) , Eq(2), Eq(nullptr) )).WillOnce( Return( nullptr ) );
     EObjectEList<std::shared_ptr<EObject>, false, true, true> list( owner, 1, 2 );
-    BOOST_CHECK( list.add( object ) );
-    BOOST_CHECK_EQUAL( list.size(), 1 );
-    BOOST_CHECK_EQUAL( list.get( 0 ), object );
-    BOOST_CHECK( !list.add( object ) );
+    EXPECT_TRUE( list.add( object ) );
+    EXPECT_EQ( list.size(), 1 );
+    EXPECT_EQ( list.get( 0 ), object );
+    EXPECT_FALSE( list.add( object ) );
 }
 
-BOOST_FIXTURE_TEST_CASE( Add_InverseOppositeNotifications , AddFixtureNotifications )
+TEST_F( EObjectEListTests_Notifications, AddInverseOpposite )
 {
-    MOCK_EXPECT( object->eInverseAdd ).with( owner, 2, nullptr ).once().returns( nullptr );
-
+    EXPECT_CALL( *object, eInverseAdd( Eq( owner ), Eq( 2 ), Eq( nullptr ) ) ).WillOnce( Return( nullptr ) );
     EObjectEList<std::shared_ptr<EObject>, false, true, true> list( owner, 1, 2 );
-    BOOST_CHECK( list.add( object ) );
-    BOOST_CHECK_EQUAL( list.size(), 1 );
-    BOOST_CHECK_EQUAL( list.get( 0 ), object );
-    BOOST_CHECK( !list.add( object ) );
+    EXPECT_TRUE( list.add( object ) );
+    EXPECT_EQ( list.size(), 1 );
+    EXPECT_EQ( list.get( 0 ), object );
+    EXPECT_FALSE( list.add( object ) );
 }
 
-BOOST_FIXTURE_TEST_CASE( Proxies, AddFixture )
+TEST_F( EObjectEListTests, Proxies )
 {
     EObjectEList<std::shared_ptr<EObject>, false, false, false, true> list( owner, 1, 2 );
     auto proxy = std::make_shared<MockObject>();
     auto resolved = std::make_shared<MockObject>();
 
-    MOCK_EXPECT( proxy->eIsProxy ).returns( true );
-    BOOST_CHECK( list.add( proxy ) );
-    MOCK_EXPECT( owner->eResolveProxy ).once().with( proxy ).returns( proxy );
-    BOOST_CHECK_EQUAL( list.get( 0 ), proxy );
-    MOCK_EXPECT( owner->eResolveProxy ).once().with( proxy ).returns( resolved );
-    BOOST_CHECK_EQUAL( list.get( 0 ), resolved );
+    EXPECT_CALL( *proxy, eIsProxy() ).WillRepeatedly( Return( true ) );
+    EXPECT_TRUE( list.add( proxy ) );
+    EXPECT_CALL( *owner, eResolveProxy( Eq(proxy) ) ).WillOnce( Return( proxy ) );
+    EXPECT_EQ( list.get( 0 ), proxy );
+    EXPECT_CALL( *owner, eResolveProxy( Eq(proxy) ) ).WillOnce( Return( resolved ) );
+    EXPECT_EQ( list.get( 0 ), resolved );
 }
 
-BOOST_FIXTURE_TEST_CASE( Unset, AddFixture )
+TEST_F( EObjectEListTests, Unset )
 {
     EObjectEList<std::shared_ptr<EObject>, false, false, false, false, true> list( owner, 1, 2 );
-    BOOST_CHECK( !list.isSet() );
-    BOOST_CHECK( list.add( object ) );
-    BOOST_CHECK( list.isSet() );
+    EXPECT_FALSE( list.isSet() );
+    EXPECT_TRUE( list.add( object ) );
+    EXPECT_TRUE( list.isSet() );
     list.unset();
-    BOOST_CHECK( !list.isSet() );
+    EXPECT_FALSE( list.isSet() );
 }
-
-BOOST_AUTO_TEST_SUITE_END()

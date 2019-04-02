@@ -11,19 +11,18 @@
 #define ECORE_MOCK_NOTIFIER_HPP_
 
 #include "ecore/ENotifier.hpp"
-#include "turtle/mock.hpp"
+#include <gmock/gmock.h>
 
 namespace ecore::tests
 {
-    class MockNotifier : public virtual ENotifier, public mock::object
+    class MockNotifier : public virtual ENotifier
     {
     public:
-        typedef ENotifier base_type;
-        MOCK_METHOD( eAdapters, 0 , EList<EAdapter*>&() );
-        MOCK_METHOD( eDeliver, 0 );
-        MOCK_METHOD( eSetDeliver, 1 );
-        MOCK_METHOD( eNotify, 1 );
+        MOCK_CONST_METHOD0( eAdapters, EList<EAdapter*>&() );
+        MOCK_CONST_METHOD0( eDeliver, bool() );
+        MOCK_METHOD1( eSetDeliver, void( bool ) );
+        MOCK_METHOD1( eNotify, void( const std::shared_ptr<ENotification>& ) );
     };
-}
+} // namespace ecore::tests
 
 #endif

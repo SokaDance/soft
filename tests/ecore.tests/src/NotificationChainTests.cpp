@@ -1,6 +1,8 @@
-#include <boost/test/auto_unit_test.hpp>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "ecore/impl/NotificationChain.hpp"
+#include "ecore/EList.hpp"
 #include "ecore/tests/MockNotification.hpp"
 #include "ecore/tests/MockNotifier.hpp"
 #include "ecore/tests/MockStructuralFeature.hpp"
@@ -8,35 +10,31 @@
 using namespace ecore;
 using namespace ecore::impl;
 using namespace ecore::tests;
+using namespace testing;
 
-BOOST_AUTO_TEST_SUITE( NotificationChainTests )
-
-BOOST_AUTO_TEST_CASE( Constructor )
+TEST( NotificationChainTests, Constructor )
 {
-    BOOST_CHECK_NO_THROW( std::make_shared<NotificationChain>() );
+    auto n = std::make_shared<NotificationChain>();
 }
 
-BOOST_AUTO_TEST_CASE( AddAndDispatch)
+TEST( NotificationChainTests, AddAndDispatch )
 {
     auto notifier = std::make_shared<MockNotifier>();
     auto feature = std::make_shared<MockStructuralFeature>();
 
     auto notification1 = std::make_shared<MockNotification>();
-    MOCK_EXPECT( notification1->getEventType ).returns( ENotification::ADD );
-    MOCK_EXPECT( notification1->getNotifier ).returns( notifier );
-    
+    EXPECT_CALL( *notification1, getEventType() ).WillOnce( Return( ENotification::ADD ) );
+    EXPECT_CALL( *notification1, getNotifier() ).WillOnce( Return( notifier ) );
+
     auto notification2 = std::make_shared<MockNotification>();
-    MOCK_EXPECT( notification2->getEventType ).returns( ENotification::ADD );
-    MOCK_EXPECT( notification2->getNotifier ).returns( notifier );
-    
+    EXPECT_CALL( *notification2, getEventType() ).WillOnce( Return( ENotification::ADD ) );
+    EXPECT_CALL( *notification2, getNotifier() ).WillOnce( Return( notifier ) );
+
     auto chain = std::make_shared<NotificationChain>();
-    BOOST_CHECK( chain->add( notification1 ) );
-    MOCK_EXPECT( notification1->merge ).with( notification2 ).returns( false );
-    BOOST_CHECK( chain->add( notification2 ) );
-    MOCK_EXPECT( notifier->eNotify ).with( notification1 );
-    MOCK_EXPECT( notifier->eNotify ).with( notification2 );
+    EXPECT_TRUE( chain->add( notification1 ) );
+    EXPECT_CALL( *notification1, merge( Eq( notification2 ) ) ).WillRepeatedly( Return( false ) );
+    EXPECT_TRUE( chain->add( notification2 ) );
+    EXPECT_CALL( *notifier, eNotify( Eq( notification1 ) ) );
+    EXPECT_CALL( *notifier, eNotify( Eq( notification2 ) ) );
     chain->dispatch();
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

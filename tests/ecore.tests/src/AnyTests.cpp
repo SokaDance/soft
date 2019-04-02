@@ -1,5 +1,4 @@
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/execution_monitor.hpp>
+#include <gtest/gtest.h>
 
 #include "ecore/Stream.hpp"
 #include "ecore/Any.hpp"
@@ -8,120 +7,116 @@
 using namespace ecore;
 using namespace ecore::tests;
 
-BOOST_AUTO_TEST_SUITE( AnyTests )
-
-BOOST_AUTO_TEST_CASE( Constructor_Default )
+TEST( AnyTests,  Constructor_Default )
 {
     Any a;
-    BOOST_CHECK( a.empty() );
-    BOOST_CHECK_EQUAL( &a.type(), &typeid( void ) );
+    EXPECT_TRUE( a.empty() );
+    EXPECT_EQ( &a.type(), &typeid( void ) );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Value_Small )
+TEST( AnyTests, Constructor_Value_Small )
 {
     Any a( 1 );
-    BOOST_CHECK( !a.empty() );
-    BOOST_CHECK_EQUAL( &a.type() , &typeid(int) );
+    EXPECT_TRUE( !a.empty() );
+    EXPECT_EQ( &a.type() , &typeid(int) );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Value_Big )
+TEST( AnyTests, Constructor_Value_Big )
 {
     Any a( std::make_shared<MockObject>() );
-    BOOST_CHECK( !a.empty() );
-    BOOST_CHECK_EQUAL( &a.type(), &typeid( std::shared_ptr<MockObject>));
+    EXPECT_TRUE( !a.empty() );
+    EXPECT_EQ( &a.type(), &typeid( std::shared_ptr<MockObject>));
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Value_Move )
+TEST( AnyTests, Constructor_Value_Move )
 {
     Any a( std::make_shared<MockObject>() );
-    BOOST_CHECK( !a.empty() );
-    BOOST_CHECK_EQUAL( &a.type(), &typeid( std::shared_ptr<MockObject> ) );
+    EXPECT_TRUE( !a.empty() );
+    EXPECT_EQ( &a.type(), &typeid( std::shared_ptr<MockObject> ) );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Copy_Small )
+TEST( AnyTests, Constructor_Copy_Small )
 {
     Any a( 1 );
     Any b( a );
-    BOOST_CHECK( !b.empty() );
-    BOOST_CHECK_EQUAL( &b.type(), &typeid( int ) );
+    EXPECT_TRUE( !b.empty() );
+    EXPECT_EQ( &b.type(), &typeid( int ) );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Copy_Big )
+TEST( AnyTests, Constructor_Copy_Big )
 {
     Any a( std::make_shared<MockObject>() );
     Any b( a );
-    BOOST_CHECK( !b.empty() );
-    BOOST_CHECK_EQUAL( &b.type(), &typeid( std::shared_ptr<MockObject> ) );
+    EXPECT_TRUE( !b.empty() );
+    EXPECT_EQ( &b.type(), &typeid( std::shared_ptr<MockObject> ) );
 }
 
-BOOST_AUTO_TEST_CASE( Constructor_Move_Small )
+TEST( AnyTests, Constructor_Move_Small )
 {
     Any a( 1 );
     Any b( std::move( a ) );
-    BOOST_CHECK( a.empty() );
-    BOOST_CHECK( !b.empty() );
-    BOOST_CHECK_EQUAL( &b.type(), &typeid( int ) );
+    EXPECT_TRUE( a.empty() );
+    EXPECT_TRUE( !b.empty() );
+    EXPECT_EQ( &b.type(), &typeid( int ) );
 }
 
-
-BOOST_AUTO_TEST_CASE( Constructor_Move_Big )
+TEST( AnyTests, Constructor_Move_Big )
 {
     Any a( std::make_shared<MockObject>() );
     Any b( std::move( a ) );
-    BOOST_CHECK( a.empty() );
-    BOOST_CHECK( !b.empty() );
-    BOOST_CHECK_EQUAL( &b.type(), &typeid( std::shared_ptr<MockObject> ) );
+    EXPECT_TRUE( a.empty() );
+    EXPECT_TRUE( !b.empty() );
+    EXPECT_EQ( &b.type(), &typeid( std::shared_ptr<MockObject> ) );
 }
 
-
-BOOST_AUTO_TEST_CASE( AnyCast )
+TEST( AnyTests, AnyCast )
 {
     {
         Any a( 1 );
-        BOOST_CHECK_EQUAL( anyCast<int>( a ), 1 );
+        EXPECT_EQ( anyCast<int>( a ), 1 );
     }
     {
         auto m = std::make_shared<MockObject>();
         Any a( m );
-        BOOST_CHECK_EQUAL( anyCast<std::shared_ptr<MockObject>>( a ), m );
+        EXPECT_EQ( anyCast<std::shared_ptr<MockObject>>( a ), m );
     }
     {
         std::string w = "test";
         Any a( w );
-        BOOST_CHECK_EQUAL( anyCast<std::string>( a ), w );
+        EXPECT_EQ( anyCast<std::string>( a ), w );
     }
 }
 
-BOOST_AUTO_TEST_CASE( BadCast )
+TEST( AnyTests, BadCast )
 {
     {
         Any a;
-        BOOST_CHECK_THROW( anyCast<long>( a ), BadAnyCast );
+        EXPECT_THROW( anyCast<long>( a ), BadAnyCast );
     }
     {
         Any a( 1 );
-        BOOST_CHECK_THROW( anyCast<long>( a ), BadAnyCast );
+        EXPECT_THROW( anyCast<long>( a ), BadAnyCast );
     }
 }
 
-BOOST_AUTO_TEST_CASE( Reset )
+TEST( AnyTests, Reset )
 {
     Any a( 1 );
     a.reset();
-    BOOST_CHECK( a.empty() );
+    EXPECT_TRUE( a.empty() );
 }
 
-BOOST_AUTO_TEST_CASE( Swap )
+TEST( AnyTests, Swap )
 {
     Any a( 1 );
     Any b( std::make_shared<MockObject>() );
     swap( a, b );
-    BOOST_CHECK_EQUAL( &a.type(), &typeid( std::shared_ptr<MockObject> ) );
-    BOOST_CHECK_EQUAL( &b.type(), &typeid( int ) );
-    BOOST_CHECK_EQUAL( anyCast<int>( b ), 1 );
+    EXPECT_EQ( &a.type(), &typeid( std::shared_ptr<MockObject> ) );
+    EXPECT_EQ( &b.type(), &typeid( int ) );
+    EXPECT_EQ( anyCast<int>( b ), 1 );
 }
 
-BOOST_AUTO_TEST_CASE( Affectation )
+TEST( AnyTests, Affectation )
 {
     {
         Any a( std::make_shared<MockObject>() );
@@ -135,7 +130,7 @@ BOOST_AUTO_TEST_CASE( Affectation )
     }
 }
 
-BOOST_AUTO_TEST_CASE( Affectation_Value )
+TEST( AnyTests, Affectation_Value )
 {
     {
         Any a( std::make_shared<MockObject>() );
@@ -147,42 +142,38 @@ BOOST_AUTO_TEST_CASE( Affectation_Value )
     }
 }
 
-BOOST_AUTO_TEST_CASE( Comparison )
+TEST( AnyTests, Comparison )
 {
     {
         Any a;
         Any b;
-        BOOST_CHECK( a == b );
+        EXPECT_TRUE( a == b );
     }
     {
         Any a( std::make_shared<MockObject>() );
         Any b( 1 );
-        BOOST_CHECK( a != b );
+        EXPECT_TRUE( a != b );
     }
 }
 
-BOOST_AUTO_TEST_CASE( Serialization )
+TEST( AnyTests, Serialization )
 {
     {
         Any a(1);
         std::ostringstream s;
         s << a;
-        BOOST_CHECK_EQUAL( s.str() , "1" );
+        EXPECT_EQ( s.str() , "1" );
     }
     {
         Any a;
         std::ostringstream s;
         s << a;
-        BOOST_CHECK_EQUAL( s.str(), "" );
+        EXPECT_EQ( s.str(), "" );
     }
     {
         Any a( std::vector<int>{ 1, 2} );
         std::ostringstream s;
         s << a;
-        BOOST_CHECK_EQUAL( s.str(), "[1,2]" );
+        EXPECT_EQ( s.str(), "[1,2]" );
     }
 }
-
-
-
-BOOST_AUTO_TEST_SUITE_END()

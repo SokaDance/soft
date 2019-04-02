@@ -11,16 +11,17 @@
 #define ECORE_MOCK_ADAPTER_HPP_
 
 #include "ecore/EAdapter.hpp"
-#include "turtle/mock.hpp"
+#include <gmock/gmock.h>
 
 namespace ecore::tests
 {
-    MOCK_BASE_CLASS( MockAdapter , EAdapter )
+    class MockAdapter : public virtual EAdapter
     {
-        MOCK_METHOD( notifyChanged, 1 );
-        MOCK_METHOD( getTarget , 0 );
-        MOCK_METHOD( setTarget, 1 );
+    public:
+        MOCK_METHOD1( notifyChanged, void( const std::shared_ptr<ENotification>& ) );
+        MOCK_CONST_METHOD0( getTarget, std::shared_ptr<ENotifier>() );
+        MOCK_METHOD1( setTarget, void( const std::shared_ptr<ENotifier>& ) );
     };
-}
+} // namespace ecore::tests
 
 #endif

@@ -20,6 +20,7 @@ namespace ecore {
     class EList : public std::enable_shared_from_this< EList<T> >{
     public:
         typedef typename T ValueType;
+        typedef typename T value_type;
 
         virtual ~EList() {}
 

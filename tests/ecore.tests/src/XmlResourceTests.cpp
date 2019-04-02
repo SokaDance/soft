@@ -1,5 +1,4 @@
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/execution_monitor.hpp>
+#include <gtest/gtest.h>
 
 #include "ecore/EAttribute.hpp"
 #include "ecore/EClass.hpp"
@@ -13,66 +12,62 @@
 using namespace ecore;
 using namespace ecore::impl;
 
-BOOST_AUTO_TEST_SUITE( XmlResourceTests )
-
-BOOST_AUTO_TEST_CASE( Load )
+TEST( XmlResourceTests, Load )
 {
     XmlResource resource( Uri( "data/simple.book.ecore" ) );
     resource.load();
 
-    BOOST_CHECK( resource.isLoaded() );
-    BOOST_CHECK( resource.getWarnings()->empty() );
-    BOOST_CHECK( resource.getErrors()->empty() );
+    EXPECT_TRUE( resource.isLoaded() );
+    EXPECT_TRUE( resource.getWarnings()->empty() );
+    EXPECT_TRUE( resource.getErrors()->empty() );
 
     auto contents = resource.getContents();
-    BOOST_CHECK_EQUAL( contents->size(), 1 );
+    EXPECT_EQ( contents->size(), 1 );
 
     auto ePackage = std::dynamic_pointer_cast<EPackage>( contents->get( 0 ) );
-    BOOST_CHECK( ePackage );
-    BOOST_CHECK_EQUAL( ePackage->getName(), "BookStorePackage" );
-    BOOST_CHECK_EQUAL( ePackage->getNsPrefix(), "bookStore" );
-    BOOST_CHECK_EQUAL( ePackage->getNsURI(), "http:///com.ibm.dynamic.example.bookStore.ecore" );
+    EXPECT_TRUE( ePackage );
+    EXPECT_EQ( ePackage->getName(), "BookStorePackage" );
+    EXPECT_EQ( ePackage->getNsPrefix(), "bookStore" );
+    EXPECT_EQ( ePackage->getNsURI(), "http:///com.ibm.dynamic.example.bookStore.ecore" );
 
     auto eClassifiers = ePackage->getEClassifiers();
-    BOOST_CHECK_EQUAL( eClassifiers->size(), 2 );
+    EXPECT_EQ( eClassifiers->size(), 2 );
 
     auto eBookStore = eClassifiers->get( 0 );
-    BOOST_CHECK_EQUAL( eBookStore->getName(), "BookStore" );
+    EXPECT_EQ( eBookStore->getName(), "BookStore" );
     auto eBookStoreClass = std::dynamic_pointer_cast<EClass>( eBookStore );
-    BOOST_CHECK( eBookStoreClass );
-    BOOST_CHECK_EQUAL( eBookStoreClass->getFeatureCount(), 3 );
+    EXPECT_TRUE( eBookStoreClass );
+    EXPECT_EQ( eBookStoreClass->getFeatureCount(), 3 );
     
     auto eOwnerFeature = eBookStoreClass->getEStructuralFeature( 0 );
-    BOOST_CHECK_EQUAL( eOwnerFeature->getName(), "owner" );
+    EXPECT_EQ( eOwnerFeature->getName(), "owner" );
     auto eOwnerAttribute = std::dynamic_pointer_cast<EAttribute>( eOwnerFeature );
-    BOOST_CHECK( eOwnerAttribute );
+    EXPECT_TRUE( eOwnerAttribute );
     
     auto eLocationFeature = eBookStoreClass->getEStructuralFeature( 1 );
-    BOOST_CHECK_EQUAL( eLocationFeature->getName(), "location" );
+    EXPECT_EQ( eLocationFeature->getName(), "location" );
     auto eLocationAttribute = std::dynamic_pointer_cast<EAttribute>( eLocationFeature );
-    BOOST_CHECK( eLocationAttribute );
+    EXPECT_TRUE( eLocationAttribute );
     auto eLocationType = eLocationAttribute->getEAttributeType();
 
     auto eBooksFeature = eBookStoreClass->getEStructuralFeature( 2 );
-    BOOST_CHECK_EQUAL( eBooksFeature->getName(), "books" );
+    EXPECT_EQ( eBooksFeature->getName(), "books" );
     auto eBooksReference = std::dynamic_pointer_cast<EReference>( eBooksFeature );
-    BOOST_CHECK( eBooksReference );
+    EXPECT_TRUE( eBooksReference );
     
     auto eBook = eClassifiers->get( 1 );
-    BOOST_CHECK_EQUAL( eBook->getName(), "Book" );
+    EXPECT_EQ( eBook->getName(), "Book" );
     auto eBookClass = std::dynamic_pointer_cast<EClass>( eBook );
-    BOOST_CHECK( eBookClass );
-    BOOST_CHECK_EQUAL( eBookClass->getFeatureCount(), 2 );
+    EXPECT_TRUE( eBookClass );
+    EXPECT_EQ( eBookClass->getFeatureCount(), 2 );
     
     auto eNameFeature = eBookClass->getEStructuralFeature( 0 );
-    BOOST_CHECK_EQUAL( eNameFeature->getName(), "name" );
+    EXPECT_EQ( eNameFeature->getName(), "name" );
     auto eNameAttribute = std::dynamic_pointer_cast<EAttribute>( eNameFeature );
-    BOOST_CHECK( eNameAttribute );
+    EXPECT_TRUE( eNameAttribute );
    
     auto eISBNFeature = eBookClass->getEStructuralFeature( 1 );
-    BOOST_CHECK_EQUAL( eISBNFeature->getName(), "isbn" );
+    EXPECT_EQ( eISBNFeature->getName(), "isbn" );
     auto eISBNAttribute = std::dynamic_pointer_cast<EAttribute>( eISBNFeature );
-    BOOST_CHECK( eISBNAttribute );
+    EXPECT_TRUE( eISBNAttribute );
 }
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -24,6 +24,10 @@ namespace ecore
     class ECollectionView<std::shared_ptr<EObject>>
     {
     public:
+        typedef std::shared_ptr<EObject> value_type;
+        typedef ETreeIterator<std::shared_ptr<EObject>> iterator;
+        typedef ETreeIterator<std::shared_ptr<EObject>> const_iterator;
+
         ECollectionView( const std::shared_ptr<EObject>& eObject )
             : elements_( eObject->eContents() )
         {
@@ -34,15 +38,34 @@ namespace ecore
         {
         }
 
-        ETreeIterator<std::shared_ptr<EObject>> begin() const
+        iterator begin()
         {
-            return ETreeIterator<std::shared_ptr<EObject>>(
-                elements_, []( const std::shared_ptr<EObject>& eObject ) { return eObject->eContents(); } );
+            return iterator(elements_, []( const std::shared_ptr<EObject>& eObject ) { return eObject->eContents(); } );
         }
 
-        ETreeIterator<std::shared_ptr<EObject>> end() const
+        iterator end()
         {
-            return ETreeIterator<std::shared_ptr<EObject>>();
+            return iterator();
+        }
+
+        const_iterator begin() const
+        {
+            return const_iterator( elements_, []( const std::shared_ptr<EObject>& eObject ) { return eObject->eContents(); } );
+        }
+
+        const_iterator end() const
+        {
+            return const_iterator();
+        }
+
+        const_iterator cbegin() const
+        {
+            return begin();
+        }
+
+        const_iterator cend() const
+        {
+            return end();
         }
 
     private:

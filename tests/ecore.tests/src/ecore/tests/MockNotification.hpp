@@ -11,21 +11,22 @@
 #define ECORE_MOCK_NOTIFICATION_HPP_
 
 #include "ecore/ENotification.hpp"
-#include "turtle/mock.hpp"
+#include <gmock/gmock.h>
 
 namespace ecore::tests
 {
-    MOCK_BASE_CLASS( MockNotification , ENotification )
+    class MockNotification : public ENotification
     {
-        MOCK_METHOD( getEventType, 0 );
-        MOCK_METHOD( getNotifier, 0 );
-        MOCK_METHOD( getFeature, 0 );
-        MOCK_METHOD( getFeatureID, 0 );
-        MOCK_METHOD( getOldValue, 0 );
-        MOCK_METHOD( getNewValue, 0 );
-        MOCK_METHOD( getPosition, 0 );
-        MOCK_METHOD( merge, 1 );
+    public:
+        MOCK_CONST_METHOD0( getEventType, ENotification::EventType() );
+        MOCK_CONST_METHOD0( getNotifier, std::shared_ptr<ENotifier>() );
+        MOCK_CONST_METHOD0( getFeature, std::shared_ptr<EStructuralFeature>() );
+        MOCK_CONST_METHOD0( getFeatureID, int() );
+        MOCK_CONST_METHOD0( getOldValue, const Any&() );
+        MOCK_CONST_METHOD0( getNewValue, const Any&() );
+        MOCK_CONST_METHOD0( getPosition, std::size_t() );
+        MOCK_METHOD1( merge, bool( const std::shared_ptr<ENotification>& ) );
     };
-}
+} // namespace ecore::tests
 
 #endif // ECORE_MOCK_NOTIFICATION_HPP_

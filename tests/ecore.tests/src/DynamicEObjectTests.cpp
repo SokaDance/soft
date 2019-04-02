@@ -1,5 +1,3 @@
-#include <boost/test/auto_unit_test.hpp>
-
 #include "ecore/EcorePackage.hpp"
 #include "ecore/EcoreFactory.hpp"
 #include "ecore/EList.hpp"
@@ -7,63 +5,63 @@
 #include "ecore/impl/DynamicEObject.hpp"
 #include "ecore/tests/MockClass.hpp"
 #include "ecore/tests/MockList.hpp"
+#include <gmock/gmock.h>
 
 using namespace ecore;
 using namespace ecore::impl;
 using namespace ecore::tests;
+using namespace testing;
 
-BOOST_AUTO_TEST_SUITE( DynamicEObjectTests )
-
-BOOST_AUTO_TEST_CASE( Constructor )
+TEST( DynamicEObjectTests, Constructor )
 {
     auto eObject = std::make_shared<DynamicEObject>();
     eObject->setThisPtr( eObject );
-    BOOST_CHECK_EQUAL( eObject, eObject->getThisPtr() );
+    EXPECT_EQ( eObject, eObject->getThisPtr() );
 }
 
-BOOST_AUTO_TEST_CASE( EClass_Mock )
+TEST( DynamicEObjectTests, EClass_Mock )
 {
     auto eObject = std::make_shared<DynamicEObject>();
     eObject->setThisPtr( eObject );
-    BOOST_CHECK_EQUAL( EcorePackage::eInstance()->getEObject(), eObject->eClass() );
+    EXPECT_EQ( EcorePackage::eInstance()->getEObject(), eObject->eClass() );
 
     auto mockAdapters = std::make_shared<MockList<EAdapter*>>();
     auto mockClass = std::make_shared<MockClass>();
-    MOCK_EXPECT( mockClass->getFeatureCount ).returns( 0 );
-    MOCK_EXPECT( mockClass->eAdapters ).returns( *mockAdapters );
-    MOCK_EXPECT( mockAdapters->add ).with(mock::any).returns(true);
+    
+    auto& mockRefAdapters = *mockAdapters;
+    auto& mockRefClass = *mockClass;
+    EXPECT_CALL( mockRefClass, getFeatureCount() ).WillOnce( Return( 0 ) );
+    EXPECT_CALL( mockRefClass, eAdapters() ).WillOnce( ReturnRef( mockRefAdapters ) );
+    EXPECT_CALL( mockRefAdapters, add( _ ) ).WillOnce( Return( true ) );
 
     eObject->setEClass( mockClass );
-    BOOST_CHECK_EQUAL( mockClass, eObject->eClass() );
+    EXPECT_EQ( mockClass, eObject->eClass() );
 }
 
-BOOST_AUTO_TEST_CASE( EClass )
+TEST( DynamicEObjectTests, EClass )
 {
     auto eObject = std::make_shared<DynamicEObject>();
     eObject->setThisPtr( eObject );
     
     auto eClass = EcoreFactory::eInstance()->createEClass();
     eObject->setEClass( eClass );
-    BOOST_CHECK_EQUAL( eClass, eObject->eClass() );
+    EXPECT_EQ( eClass, eObject->eClass() );
 }
 
 
-BOOST_AUTO_TEST_CASE( Attribute )
+TEST( DynamicEObjectTests, Attribute )
 {
     auto eObject = std::make_shared<DynamicEObject>();
     eObject->setThisPtr( eObject );
 
     auto eClass = EcoreFactory::eInstance()->createEClass();
     eObject->setEClass( eClass );
-    BOOST_CHECK_EQUAL( eClass, eObject->eClass() );
+    EXPECT_EQ( eClass, eObject->eClass() );
 
     auto eFeature = EcoreFactory::eInstance()->createEAttribute();
     eClass->getEStructuralFeatures()->add( eFeature );
 
-    BOOST_CHECK( eObject->eGet( eFeature ).empty() );
+    EXPECT_TRUE( eObject->eGet( eFeature ).empty() );
     eObject->eSet( eFeature, 1 );
-    BOOST_CHECK_EQUAL( eObject->eGet( eFeature ), 1 );
+    EXPECT_EQ( eObject->eGet( eFeature ), 1 );
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

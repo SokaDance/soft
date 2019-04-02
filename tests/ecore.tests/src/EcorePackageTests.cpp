@@ -1,21 +1,16 @@
-#include <boost/test/auto_unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include "ecore/EcorePackage.hpp"
 #include "ecore/EcoreFactory.hpp"
 
 using namespace ecore;
 
-BOOST_AUTO_TEST_SUITE(EcorePackageTests)
-
-BOOST_AUTO_TEST_CASE(Constructor)
+TEST( EcorePackageTests, Constructor)
 {
-    BOOST_CHECK( EcorePackage::eInstance() );
+    EXPECT_TRUE( EcorePackage::eInstance() );
 }
 
-BOOST_AUTO_TEST_CASE( Getters )
+TEST( EcorePackageTests,  Getters )
 {
-    BOOST_CHECK_EQUAL( EcorePackage::eInstance()->getEFactoryInstance(), EcoreFactory::eInstance() );
+    EXPECT_EQ( EcorePackage::eInstance()->getEFactoryInstance(), EcoreFactory::eInstance() );
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()
