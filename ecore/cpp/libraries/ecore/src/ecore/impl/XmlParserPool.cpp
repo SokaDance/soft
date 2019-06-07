@@ -4,14 +4,14 @@ using namespace ecore;
 using namespace ecore::impl;
 using namespace xercesc;
 
-SaxParserPool& SaxParserPool::getInstance()
+XmlParserPool& XmlParserPool::getInstance()
 {
-    static SaxParserPool instance;
+    static XmlParserPool instance;
     return instance;
 }
 
 
-SaxParserPool::SaxParserPool()
+XmlParserPool::XmlParserPool()
 {
     try
     {
@@ -26,7 +26,7 @@ SaxParserPool::SaxParserPool()
     }
 }
 
-SaxParserPool::~SaxParserPool()
+XmlParserPool::~XmlParserPool()
 {
     try
     {
@@ -37,7 +37,7 @@ SaxParserPool::~SaxParserPool()
     }
 }
 
-std::shared_ptr<SAX2XMLReader> SaxParserPool::getParser( const std::map<std::string, bool>& features )
+std::shared_ptr<SAX2XMLReader> XmlParserPool::getParser( const std::map<std::string, bool>& features )
 {
     std::shared_ptr<SAX2XMLReader> result;
     if( parsers_.empty()  )
@@ -57,7 +57,7 @@ std::shared_ptr<SAX2XMLReader> SaxParserPool::getParser( const std::map<std::str
     return result;
 }
 
-void SaxParserPool::releaseParser( std::shared_ptr<xercesc::SAX2XMLReader>& parser )
+void XmlParserPool::releaseParser( std::shared_ptr<xercesc::SAX2XMLReader>& parser )
 {
     parsers_.push_back( parser );
 }

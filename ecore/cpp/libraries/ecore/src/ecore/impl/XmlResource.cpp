@@ -22,7 +22,7 @@ XmlResource::~XmlResource()
 
 void XmlResource::doLoad( std::istream& is )
 {
-    auto& pool = SaxParserPool::getInstance();
+    auto& pool = XmlParserPool::getInstance();
     auto parser = pool.getParser();
 
     XmlHandler handler( *this );
@@ -30,6 +30,8 @@ void XmlResource::doLoad( std::istream& is )
 
     XmlInputSource source( is );
     parser->parse( source );
+
+    pool.releaseParser( parser );
 }
 
 void XmlResource::doSave( std::ostream& os )

@@ -17,19 +17,19 @@
 
 namespace ecore::impl
 {
-    class SaxParserPool
+    class XmlParserPool
     {
     public:
-        static SaxParserPool& getInstance();
+        static XmlParserPool& getInstance();
 
-        ~SaxParserPool();
+        ~XmlParserPool();
 
         std::shared_ptr<xercesc::SAX2XMLReader> getParser( const std::map<std::string, bool>& features = std::map<std::string, bool>());
 
         void releaseParser( std::shared_ptr<xercesc::SAX2XMLReader>& parser );
 
     private:
-        SaxParserPool();
+        XmlParserPool();
 
 
     private:

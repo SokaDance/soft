@@ -55,14 +55,15 @@ set(HEADER_ECORE_IMPL_FILES
     src/ecore/impl/ResourceFactoryRegistry.hpp
     src/ecore/impl/Proxy.hpp
     src/ecore/impl/ResourceSet.hpp
-    src/ecore/impl/SaxParserPool.hpp
     src/ecore/impl/StringUtils.hpp
     src/ecore/impl/TypeTraits.hpp
     src/ecore/impl/UriConverter.hpp
     src/ecore/impl/WeakPtr.hpp
-    src/ecore/impl/XmlInputSource.hpp
+    src/ecore/impl/XmlDocument.hpp
     src/ecore/impl/XmlHandler.hpp
+    src/ecore/impl/XmlInputSource.hpp
     src/ecore/impl/XmlNamespaces.hpp
+    src/ecore/impl/XmlParserPool.hpp
     src/ecore/impl/XmlResource.hpp
     src/ecore/impl/XmlResourceFactory.hpp
 )
@@ -80,10 +81,11 @@ set(SOURCE_ECORE_IMPL_FILES
     src/ecore/impl/PackageRegistry.cpp
     src/ecore/impl/ResourceFactoryRegistry.cpp
     src/ecore/impl/ResourceSet.cpp
-    src/ecore/impl/SaxParserPool.cpp
     src/ecore/impl/UriConverter.cpp
+    src/ecore/impl/XmlDocument.cpp
     src/ecore/impl/XmlHandler.cpp
     src/ecore/impl/XmlNamespaces.cpp
+    src/ecore/impl/XmlParserPool.cpp
     src/ecore/impl/XmlResource.cpp
     src/ecore/impl/XmlResourceFactory.cpp
 )
