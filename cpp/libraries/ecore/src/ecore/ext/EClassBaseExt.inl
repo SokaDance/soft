@@ -275,8 +275,9 @@ namespace ecore::ext
         auto features = getEStructuralFeatures();
         for( const auto& feature : *features )
         {
-            if( auto attribute = std::dynamic_pointer_cast<EAttribute>( feature ) )
+            if( !feature->isReference() )
             {
+                auto attribute = std::static_pointer_cast<EAttribute>( feature );
                 attributes.push_back( attribute );
                 allAttributes.push_back( attribute );
                 if( attribute->isID() && !eIDAttribute )
@@ -305,8 +306,9 @@ namespace ecore::ext
         auto features = getEStructuralFeatures();
         for( const auto& feature : *features )
         {
-            if( auto reference = std::dynamic_pointer_cast<EReference>( feature ) )
+            if( feature->isReference() )
             {
+                auto reference = std::static_pointer_cast<EReference>( feature );
                 references.push_back( reference );
                 allReferences.push_back( reference );
             }
@@ -492,8 +494,9 @@ namespace ecore::ext
         auto eFeatures = getEStructuralFeatures();
         for( const auto& feature : *eFeatures )
         {
-            if( auto reference = std::dynamic_pointer_cast<EReference>( feature ) )
+            if( feature->isReference() )
             {
+                auto reference = std::static_pointer_cast<EReference>( feature );
                 if( reference->isContainment() )
                 {
                     if( !reference->isDerived() )

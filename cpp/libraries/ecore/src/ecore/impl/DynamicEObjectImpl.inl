@@ -346,18 +346,22 @@ namespace ecore::impl
     template <typename... I>
     bool DynamicEObjectBase<I...>::isBidirectional(const std::shared_ptr<EStructuralFeature>& eStructuralFeature) const
     {
-        if (auto eReference = std::dynamic_pointer_cast<EReference>(eStructuralFeature))
-            return static_cast<bool>(eReference->getEOpposite());
+        if( eStructuralFeature->isReference() )
+        {
+            auto eReference = std::static_pointer_cast<EReference>( eStructuralFeature );
+            return static_cast<bool>( eReference->getEOpposite() );
+        }
         return false;
     }
 
     template <typename... I>
     bool DynamicEObjectBase<I...>::isContainer(const std::shared_ptr<EStructuralFeature>& eStructuralFeature) const
     {
-        if (auto eReference = std::dynamic_pointer_cast<EReference>(eStructuralFeature))
+        if( eStructuralFeature->isReference() )
         {
-            if (auto opposite = eReference->getEOpposite())
-                return static_cast<bool>(opposite->isContainment());
+            auto eReference = std::static_pointer_cast<EReference>( eStructuralFeature );
+            if (auto eOpposite = eReference->getEOpposite())
+                return static_cast<bool>( eOpposite->isContainment() );
         }
         return false;
     }
@@ -365,16 +369,23 @@ namespace ecore::impl
     template <typename... I>
     bool DynamicEObjectBase<I...>::isContains(const std::shared_ptr<EStructuralFeature>& eStructuralFeature) const
     {
-        if (auto eReference = std::dynamic_pointer_cast<EReference>(eStructuralFeature))
+        if( eStructuralFeature->isReference() )
+        {
+            auto eReference = std::static_pointer_cast<EReference>( eStructuralFeature );
             return eReference->isContainment();
+        }
         return false;
     }
 
     template <typename... I>
     bool DynamicEObjectBase<I...>::isBackReference(const std::shared_ptr<EStructuralFeature>& eStructuralFeature) const
     {
-        if (auto eReference = std::dynamic_pointer_cast<EReference>(eStructuralFeature))
+        if( eStructuralFeature->isReference() )
+        {
+            auto eReference = std::static_pointer_cast<EReference>( eStructuralFeature );
             return eReference->isContainer();
+        }
+
         return false;
     }
 
@@ -383,8 +394,11 @@ namespace ecore::impl
     {
         if (isContainer(eStructuralFeature) || isContains(eStructuralFeature))
             return false;
-        if (auto eReference = std::dynamic_pointer_cast<EReference>(eStructuralFeature))
+        if( eStructuralFeature->isReference() )
+        {
+            auto eReference = std::static_pointer_cast<EReference>( eStructuralFeature );
             return eReference->isResolveProxies();
+        }
         return false;
     }
 
@@ -397,15 +411,9 @@ namespace ecore::impl
     template <typename... I>
     std::shared_ptr<EList<std::shared_ptr<EObject>>> DynamicEObjectBase<I...>::createList(const std::shared_ptr<EStructuralFeature>& eStructuralFeature) const
     {
-        if (auto eAttribute = std::dynamic_pointer_cast<EAttribute>(eStructuralFeature))
+        if (eStructuralFeature->isReference() )
         {
-            if (eAttribute->isUnique())
-                return std::make_shared< ArrayEList<std::shared_ptr<EObject>, true> >();
-            else
-                return std::make_shared< ArrayEList<std::shared_ptr<EObject>, false> >();
-        }
-        else if (auto eReference = std::dynamic_pointer_cast<EReference>(eStructuralFeature))
-        {
+            auto eReference = std::static_pointer_cast<EReference>( eStructuralFeature );
             if (eReference->isContainment())
             {
                 // containment
@@ -494,6 +502,14 @@ namespace ecore::impl
                     }
                 }
             }
+        }
+        else
+        {
+            auto eAttribute = std::static_pointer_cast<EAttribute>( eStructuralFeature );
+            if( eAttribute->isUnique() )
+                return std::make_shared<ArrayEList<std::shared_ptr<EObject>, true>>();
+            else
+                return std::make_shared<ArrayEList<std::shared_ptr<EObject>, false>>();
         }
         return std::shared_ptr< EList<std::shared_ptr<EObject>> >();
     }

@@ -32,6 +32,8 @@ namespace ecore::ext
     public:
         virtual ~EStructuralFeatureBaseExt();
 
+        virtual bool isReference() const;
+
         virtual const Any& getDefaultValue() const;
 
         virtual void setDefaultValue( const Any& newDefaultValue );

@@ -448,9 +448,9 @@ XMLSave::FeatureKind XMLSave::getFeatureKind( const std::shared_ptr<EStructuralF
     auto isMany = eFeature->isMany();
     auto isUnsettable = eFeature->isUnsettable();
 
-    auto eReference = std::dynamic_pointer_cast<EReference>( eFeature );
-    if( eReference )
+    if( eFeature->isReference() )
     {
+        auto eReference = std::static_pointer_cast<EReference>( eFeature );
         if( eReference->isContainment() )
             return isMany ? isUnsettable ? OBJECT_CONTAIN_MANY_UNSETTABLE : OBJECT_CONTAIN_MANY
                           : isUnsettable ? OBJECT_CONTAIN_SINGLE_UNSETTABLE : OBJECT_CONTAIN_SINGLE;
@@ -463,7 +463,7 @@ XMLSave::FeatureKind XMLSave::getFeatureKind( const std::shared_ptr<EStructuralF
     else
     {
         // Attribute
-        auto d = std::dynamic_pointer_cast<EDataType>( eFeature->getEType() );
+        auto d = std::static_pointer_cast<EDataType>( eFeature->getEType() );
         if( !d->isSerializable() )
             return TRANSIENT;
         if( isMany )

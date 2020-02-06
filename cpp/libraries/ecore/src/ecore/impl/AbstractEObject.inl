@@ -209,14 +209,14 @@ namespace ecore::impl
             if( eContainerFeatureID <= EOPPOSITE_FEATURE_BASE )
             {
                 auto eFeature = eContainer->eClass()->getEStructuralFeature( EOPPOSITE_FEATURE_BASE - eContainerFeatureID );
-                if( auto eReference = std::dynamic_pointer_cast<EReference>( eFeature ) )
-                    return eReference;
+                if( eFeature->isReference() )
+                    return std::static_pointer_cast<EReference>( eFeature );
             }
             else
             {
                 auto eFeature = eObject->eClass()->getEStructuralFeature( eContainerFeatureID );
-                if( auto eReference = std::dynamic_pointer_cast<EReference>( eFeature ) )
-                    return eReference->getEOpposite();
+                if( eFeature->isReference() )
+                    return std::static_pointer_cast<EReference>( eFeature )->getEOpposite();
             }
             throw "The containment feature could not be located";
         }
@@ -562,9 +562,10 @@ namespace ecore::impl
     std::shared_ptr<ENotificationChain> AbstractEObject<I...>::eBasicRemoveFromContainerFeature(
         const std::shared_ptr<ENotificationChain>& notifications )
     {
-        auto reference = std::dynamic_pointer_cast<EReference>( eClass()->getEStructuralFeature( eContainerFeatureID_ ) );
-        if( reference )
+        auto feature = eClass()->getEStructuralFeature( eContainerFeatureID_ );
+        if( feature->isReference() )
         {
+            auto reference = std::static_pointer_cast<EReference>( feature );
             auto inverseFeature = reference->getEOpposite();
             auto container = eContainer_.lock();
             if( container && inverseFeature )

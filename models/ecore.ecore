@@ -578,6 +578,14 @@
         <eTypeArguments/>
       </eGenericType>
     </eOperations>
+    <eOperations name="isReference" eType="#//EBoolean">
+      <eAnnotations source="http://net.masagroup/soft/2018/GenCpp">
+        <details key="const"/>
+      </eAnnotations>
+      <eAnnotations source="http://net.masagroup/soft/2019/GenGo">
+        <details key="default" value="false"/>
+      </eAnnotations>
+    </eOperations>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="changeable" eType="#//EBoolean"
         defaultValueLiteral="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="volatile" eType="#//EBoolean"/>

@@ -12,6 +12,7 @@
 #endif
 
 #include "ecore/EClass.hpp"
+#include "EReferenceBaseExt.hpp"
 
 namespace ecore::ext {
 
@@ -23,6 +24,12 @@ namespace ecore::ext {
     template <typename... I>
     EReferenceBaseExt<I...>::~EReferenceBaseExt()
     {
+    }
+
+    template <typename... I>
+    bool EReferenceBaseExt<I...>::isReference() const
+    {
+        return true;
     }
 
     template <typename... I>

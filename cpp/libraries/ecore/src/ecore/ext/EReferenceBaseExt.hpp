@@ -32,6 +32,8 @@ namespace ecore::ext
     public:
         virtual ~EReferenceBaseExt();
 
+        virtual bool isReference() const;
+
         virtual bool isContainer() const;
 
         virtual std::shared_ptr<ecore::EClass> getEReferenceType() const;

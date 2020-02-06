@@ -269,7 +269,7 @@ XMLLoad::FeatureKind XMLLoad::getFeatureKind( const std::shared_ptr<EStructuralF
     }
     else if( eFeature->isMany() )
     {
-        auto eReference = std::dynamic_pointer_cast<EReference>( eFeature );
+        auto eReference = std::static_pointer_cast<EReference>( eFeature );
         auto eOpposite = eReference->getEOpposite();
         if( !eOpposite || eOpposite->isTransient() || !eOpposite->isMany() )
             return ManyAdd;

@@ -16,6 +16,7 @@
 #include "ecore/EFactory.hpp"
 #include "ecore/EPackage.hpp"
 #include "ecore/impl/EStructuralFeatureInternal.hpp"
+#include "EStructuralFeatureBaseExt.hpp"
 
 namespace ecore::ext
 {
@@ -28,6 +29,12 @@ namespace ecore::ext
     template <typename... I>
     EStructuralFeatureBaseExt<I...>::~EStructuralFeatureBaseExt()
     {
+    }
+
+    template <typename... I>
+    bool EStructuralFeatureBaseExt<I...>::isReference() const
+    {
+        return false;
     }
 
     template <typename... I>
