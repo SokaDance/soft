@@ -65,16 +65,16 @@ namespace ecore::impl
 
 #endif
 
-    inline std::vector<std::string> split( const std::string& s, const std::string& token )
+    inline std::vector<std::string_view> split( const std::string_view& s, const std::string_view& token )
     {
-        std::vector<std::string> result;
+        std::vector<std::string_view> result;
         std::size_t pos = 0;
         std::size_t start = 0;
-        while ((pos = s.find(token, start)) != std::string::npos) {
-            result.emplace_back(s.substr(start, pos - start ));
+        while ((pos = s.find(token, start)) != std::string_view::npos) {
+            result.emplace_back( s.data() + start, pos - start );
             start = pos + 1;
         }
-        result.emplace_back(s.substr(start, pos - start));
+        result.emplace_back( s.data() + start, s.size() - start );
         return result;
     }
 

@@ -21,8 +21,8 @@ BOOST_AUTO_TEST_SUITE(StringUtilsTests)
 
 BOOST_AUTO_TEST_CASE(Split)
 {
-    BOOST_CHECK_EQUAL(split("testnospace", " "), std::vector<std::string>({ "testnospace" }));
-    BOOST_CHECK_EQUAL(split("test with space", " "), std::vector<std::string>({"test","with","space"}));
+    BOOST_CHECK_EQUAL(split("testnospace", " "), std::vector<std::string_view>({ "testnospace" }));
+    BOOST_CHECK_EQUAL( split( "test with space", " " ), std::vector<std::string_view>( {"test", "with", "space"} ) );
 }
 
 

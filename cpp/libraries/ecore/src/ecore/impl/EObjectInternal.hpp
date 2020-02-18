@@ -37,7 +37,7 @@ namespace ecore::impl
 
 
         // URI Fragment
-        virtual std::shared_ptr<EObject> eObjectForFragmentSegment( const std::string& uriSegment) const= 0;
+        virtual std::shared_ptr<EObject> eObjectForFragmentSegment( const std::string_view& uriSegment) const= 0;
         
         virtual std::string eURIFragmentSegment(const std::shared_ptr<EStructuralFeature>& feature, const std::shared_ptr<EObject>& eObject) const = 0;
 

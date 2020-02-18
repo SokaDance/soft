@@ -74,7 +74,7 @@ namespace ecore::impl
         virtual std::shared_ptr<EObject> eResolveProxy( const std::shared_ptr<EObject>& proxy ) const;
 
         // Fragment
-        virtual std::shared_ptr<EObject> eObjectForFragmentSegment( const std::string& uriSegment ) const;
+        virtual std::shared_ptr<EObject> eObjectForFragmentSegment( const std::string_view& uriSegment ) const;
         virtual std::string eURIFragmentSegment( const std::shared_ptr<EStructuralFeature>& feature,
                                                  const std::shared_ptr<EObject>& eObject ) const;
 

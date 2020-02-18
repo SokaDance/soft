@@ -374,6 +374,22 @@ void XMLLoad::setAttributeValue( const std::shared_ptr<EObject>& eObject, const 
 
 struct XMLLoad::Reference
 {
+    Reference( const std::shared_ptr<EObject>& object,
+               const std::shared_ptr<EStructuralFeature>& feature,
+               const std::string& id,
+               int pos,
+               int line,
+               int column )
+        : object_(object)
+        , feature_(feature)
+        , id_(id)
+        , pos_(pos)
+        , line_(line)
+        , column_( column )
+    {
+    
+    }
+
     std::shared_ptr<EObject> object_;
     std::shared_ptr<EStructuralFeature> feature_;
     std::string id_;
@@ -459,7 +475,7 @@ void XMLLoad::setValueFromId( const std::shared_ptr<EObject>& eObject,
         }
 
         if( mustAdd )
-            references.push_back( {eObject, eReference, id, position, line, column} );
+            references.emplace_back( eObject, eReference, id, position, line, column );
 
         qName.clear();
         ++position;

@@ -109,7 +109,7 @@ std::shared_ptr<EObject> EcoreUtils::getEObject( const std::shared_ptr<EObject>&
     auto segments = split( relativeFragmentPath, "/" );
     auto eObject = rootEObject;
     for( int i = 0; i < segments.size() && eObject; ++i )
-        eObject = eObject->getInternal().eObjectForFragmentSegment( std::string( segments[i] ) );
+        eObject = eObject->getInternal().eObjectForFragmentSegment( segments[i] );
     return eObject;
 }
 

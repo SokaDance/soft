@@ -15,8 +15,8 @@
 #include "ecore/impl/ResourceURIConverter.hpp"
 #include "ecore/impl/StringUtils.hpp"
 
-#include <cctype>
 #include <sstream>
+#include <charconv>
 
 using namespace ecore;
 using namespace ecore::impl;
@@ -99,21 +99,21 @@ std::shared_ptr<const ECollectionView<std::shared_ptr<EObject>>> AbstractResourc
 
 std::shared_ptr<EObject> AbstractResource::getEObject( const std::string& uriFragment ) const
 {
-    auto id = uriFragment;
-    auto size = uriFragment.size();
-    if( !uriFragment.empty() )
+    std::string_view id = uriFragment;
+    auto size = id.size();
+    if( !id.empty() )
     {
-        if( uriFragment.at( 0 ) == '/' )
+        if( id.at( 0 ) == '/' )
         {
-            auto path = split( uriFragment, "/" );
+            auto path = split( id, "/" );
             path.erase( path.begin() );
             return getObjectByPath( path );
         }
-        else if( uriFragment.at( size - 1 ) == '?' )
+        else if( id.at( size - 1 ) == '?' )
         {
-            auto index = uriFragment.find_last_of( '?', size - 2 );
-            if( index != std::string::npos )
-                id = uriFragment.substr( 0, index );
+            auto index = id.find_last_of( '?', size - 2 );
+            if( index != std::string_view::npos )
+                id = id.substr(0, index );
         }
     }
     return getObjectByID( id );
@@ -165,7 +165,7 @@ std::string AbstractResource::getURIFragmentRootSegment( const std::shared_ptr<E
     return contents->size() > 1 ? std::to_string( contents->indexOf( eObject ) ) : "";
 }
 
-std::shared_ptr<EObject> AbstractResource::getObjectByPath( const std::vector<std::string>& uriFragmentPath ) const
+std::shared_ptr<EObject> AbstractResource::getObjectByPath( const std::vector<std::string_view>& uriFragmentPath ) const
 {
     auto eObject = getObjectForRootSegment( uriFragmentPath.empty() ? "" : uriFragmentPath[0] );
     for( int i = 1; i < uriFragmentPath.size() && eObject; ++i )
@@ -173,7 +173,7 @@ std::shared_ptr<EObject> AbstractResource::getObjectByPath( const std::vector<st
     return eObject;
 }
 
-std::shared_ptr<EObject> AbstractResource::getObjectByID( const std::string& id ) const
+std::shared_ptr<EObject> AbstractResource::getObjectByID( const std::string_view& id ) const
 {
     auto allContents = getAllContents();
     for( auto eObject : *allContents )
@@ -185,7 +185,7 @@ std::shared_ptr<EObject> AbstractResource::getObjectByID( const std::string& id 
     return std::shared_ptr<EObject>();
 }
 
-std::shared_ptr<EObject> AbstractResource::getObjectForRootSegment( const std::string& rootSegment ) const
+std::shared_ptr<EObject> AbstractResource::getObjectForRootSegment( const std::string_view& rootSegment ) const
 {
     int position = 0;
     if( !rootSegment.empty() )
@@ -193,7 +193,7 @@ std::shared_ptr<EObject> AbstractResource::getObjectForRootSegment( const std::s
         if( rootSegment.at( 0 ) == '?' )
             return getObjectByID( rootSegment.substr( 1 ) );
         else
-            position = std::stoi( rootSegment );
+            std::from_chars( rootSegment.data() ,rootSegment.data() + rootSegment.size() , position );
     }
     return position >= 0 && position < getContents()->size() ? getContents()->get( position ) : std::shared_ptr<EObject>();
 }

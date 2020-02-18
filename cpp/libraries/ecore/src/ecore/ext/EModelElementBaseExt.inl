@@ -15,8 +15,7 @@
 #include "ecore/ENamedElement.hpp"
 #include "ecore/EList.hpp"
 
-#include <algorithm>
-#include <sstream>
+#include <charconv>
 
 namespace ecore::ext
 {
@@ -46,7 +45,7 @@ namespace ecore::ext
     }
 
     template <typename... I>
-    std::shared_ptr<EObject> EModelElementBaseExt<I...>::eObjectForFragmentSegment(const std::string& uriFragmentSegment) const
+    std::shared_ptr<EObject> EModelElementBaseExt<I...>::eObjectForFragmentSegment( const std::string_view& uriFragmentSegment ) const
     {
         if (!uriFragmentSegment.empty()) {
             // Is the first character a special character, i.e., something other than '@'?
@@ -62,17 +61,13 @@ namespace ecore::ext
                         // Decode all encoded characters.
                         //
                         auto encodedSource = uriFragmentSegment.substr(1, index);
-                        auto source = "%" == encodedSource ? "" : uriUnescape(encodedSource);
+                        auto source = "%" == encodedSource ? "" : uriUnescape(std::string(encodedSource));
 
                         // Check for a count, i.e., a '.' followed by a number.
                         int count = 0;
                         if (hasCount) {
-                            try {
-                                count = std::stoi(uriFragmentSegment.substr(index + 2));
-                            }
-                            catch (...) {
-
-                            }
+                            auto strCount = uriFragmentSegment.substr( index + 2 );
+                            std::from_chars( strCount.data(), strCount.data() + strCount.size(), count );
                         }
 
                         // Look for the annotation with the matching source.
@@ -96,15 +91,10 @@ namespace ecore::ext
                 auto name = index == -1 ? uriFragmentSegment : uriFragmentSegment.substr(0, index);
                 int count = 0;
                 if (index != -1) {
-                    try {
-                        count = std::stoi(uriFragmentSegment.substr(index + 1));
-                    }
-                    catch (...) {
-                        name = uriFragmentSegment;
-                    }
+                    auto strCount = uriFragmentSegment.substr( index + 1 );
+                    std::from_chars( strCount.data(), strCount.data() + strCount.size(), count );
                 }
-
-                name = name == "%" ? "" : uriUnescape(name);
+                name = name == "%" ? "" : uriUnescape(std::string(name));
 
                 auto contents = eContents();
                 for (auto eObject : *contents) {

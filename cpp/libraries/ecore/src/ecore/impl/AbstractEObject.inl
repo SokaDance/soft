@@ -28,8 +28,7 @@
 #include "ecore/impl/Notification.hpp"
 
 #include "AbstractEObject.hpp"
-#include <sstream>
-#include <string>
+#include <charconv>
 
 namespace ecore::impl
 {
@@ -184,7 +183,7 @@ namespace ecore::impl
     }
 
     template <typename... I>
-    std::shared_ptr<EObject> AbstractEObject<I...>::eObjectForFragmentSegment( const std::string& uriSegment ) const
+    std::shared_ptr<EObject> AbstractEObject<I...>::eObjectForFragmentSegment( const std::string_view& uriSegment ) const
     {
         std::size_t index = std::string::npos;
         if( !uriSegment.empty() && std::isdigit( uriSegment.back() ) )
@@ -192,9 +191,11 @@ namespace ecore::impl
             index = uriSegment.find_last_of( '.' );
             if( index != std::string::npos )
             {
-                auto position = std::stoi( uriSegment.substr( index + 1 ) );
+                int position = 0;
+                auto strPos = uriSegment.substr( index + 1 );
+                std::from_chars( strPos.data(), strPos.data() + strPos.size(), position );
                 auto eFeatureName = uriSegment.substr( 0, index );
-                auto eFeature = eStructuralFeature( eFeatureName );
+                auto eFeature = eStructuralFeature( std::string(eFeatureName) );
                 auto value = eGet( eFeature );
                 auto list = anyListCast<std::shared_ptr<EObject>>( value );
                 if( position < list->size() )
@@ -203,7 +204,7 @@ namespace ecore::impl
         }
         if( index == std::string::npos )
         {
-            auto eFeature = eStructuralFeature( uriSegment );
+            auto eFeature = eStructuralFeature(  std::string(uriSegment) );
             auto value = eGet( eFeature );
             return anyCast<std::shared_ptr<EObject>>( value );
         }
@@ -650,7 +651,7 @@ namespace ecore::impl
         {
             return getObject().eSetResource( resource, notifications );
         }
-        virtual std::shared_ptr<EObject> eObjectForFragmentSegment( const std::string& uriSegment ) const override
+        virtual std::shared_ptr<EObject> eObjectForFragmentSegment( const std::string_view& uriSegment ) const override
         {
             return getObject().eObjectForFragmentSegment( uriSegment );
         }
