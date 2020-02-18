@@ -70,6 +70,7 @@ set(HEADER_ECORE_IMPL_FILES
     src/ecore/impl/StringUtils.hpp
     src/ecore/impl/TypeTraits.hpp
     src/ecore/impl/WeakPtr.hpp
+    src/ecore/impl/XercesStr.hpp
     src/ecore/impl/XMILoad.hpp
     src/ecore/impl/XMIResource.hpp
     src/ecore/impl/XMIResourceFactory.hpp

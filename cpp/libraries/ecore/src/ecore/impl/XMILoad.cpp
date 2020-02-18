@@ -1,6 +1,6 @@
 #include "ecore/impl/XMILoad.hpp"
-#include "ecore/impl/StringUtils.hpp"
 #include "ecore/impl/XMIResource.hpp"
+#include "ecore/impl/XercesStr.hpp"
 
 using namespace ecore;
 using namespace ecore::impl;
@@ -48,7 +48,7 @@ std::string ecore::impl::XMILoad::getXSIType() const
         auto xmiType = isNamespaceAware_
                            ? ( attributes_ ? attributes_->getValue( XMI_URI, TYPE ) : attributes_->getValue( XMI_TYPE_ATTRIB ) )
                            : nullptr;
-        xsiType = xmiType ? utf16_to_utf8( xmiType ) : "";
+        xsiType = xmiType ? cStr( xmiType ).getPtr() : "";
     }
     return xsiType;
 }
@@ -60,7 +60,7 @@ void XMILoad::handleAttributes( const std::shared_ptr<EObject>& eObject )
     {
         auto xmiVersion = attributes_->getValue( VERSION_ATTRIB );
         if( xmiVersion )
-            resource_.setXMIVersion( utf16_to_utf8( xmiVersion ) );
+            resource_.setXMIVersion( cStr( xmiVersion ).getPtr() );
     }
     XMLLoad::handleAttributes( eObject );
 }

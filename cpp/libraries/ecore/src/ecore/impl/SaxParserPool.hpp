@@ -39,13 +39,12 @@ namespace ecore::impl
 
         static SaxParserPool& getInstance();
 
-        ~SaxParserPool();
-
         std::unique_ptr<SaxParser> getParser( const std::map<std::string, bool>& features = std::map<std::string, bool>());
 
     private:
         SaxParserPool();
 
+        ~SaxParserPool();
 
     private:
         std::list<std::shared_ptr<xercesc::SAX2XMLReader>> readers_;

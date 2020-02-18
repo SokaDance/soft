@@ -14,6 +14,7 @@
 #include "ecore/impl/EObjectInternal.hpp"
 #include "ecore/impl/StringUtils.hpp"
 #include "ecore/impl/XMLResource.hpp"
+#include "ecore/impl/XercesStr.hpp"
 
 #include <iostream>
 #include <string>
@@ -84,7 +85,7 @@ void XMLLoad::startElement( const XMLCh* const uri,
                             const xercesc::Attributes& attrs )
 {
     setAttributes( &attrs );
-    startElement( utf16_to_utf8( uri ), utf16_to_utf8( localname ), utf16_to_utf8( qname ) );
+    startElement( cStr( uri ).getPtr(), cStr( localname ).getPtr(), cStr( qname ).getPtr() );
 }
 
 void XMLLoad::startElement( const std::string uri, const std::string& localName, const std::string& qname )
@@ -123,7 +124,7 @@ void XMLLoad::startPrefixMapping( const XMLCh* const prefix, const XMLCh* const 
         namespaces_.pushContext();
         isPushContext_ = false;
     }
-    handleNamespace( utf16_to_utf8( prefix ), utf16_to_utf8( uri ) );
+    handleNamespace( cStr( prefix ).getPtr(), cStr( uri ).getPtr() );
 }
 
 void XMLLoad::endPrefixMapping( const XMLCh* const prefix )
@@ -137,19 +138,19 @@ void XMLLoad::characters( const XMLCh* const chars, const XMLSize_t length )
 void XMLLoad::error( const SAXParseException& exc )
 {
     error( std::make_shared<Diagnostic>(
-        utf16_to_utf8( exc.getMessage() ), "", static_cast<int>( exc.getLineNumber() ), static_cast<int>( exc.getColumnNumber() ) ) );
+        cStr( exc.getMessage() ).getPtr(), "", static_cast<int>( exc.getLineNumber() ), static_cast<int>( exc.getColumnNumber() ) ) );
 }
 
 void XMLLoad::fatalError( const SAXParseException& exc )
 {
     error( std::make_shared<Diagnostic>(
-        utf16_to_utf8( exc.getMessage() ), "", static_cast<int>( exc.getLineNumber() ), static_cast<int>( exc.getColumnNumber() ) ) );
+        cStr( exc.getMessage() ).getPtr(), "", static_cast<int>( exc.getLineNumber() ), static_cast<int>( exc.getColumnNumber() ) ) );
 }
 
 void XMLLoad::warning( const SAXParseException& exc )
 {
     warning( std::make_shared<Diagnostic>(
-        utf16_to_utf8( exc.getMessage() ), "", static_cast<int>( exc.getLineNumber() ), static_cast<int>( exc.getColumnNumber() ) ) );
+        cStr( exc.getMessage() ).getPtr(), "", static_cast<int>( exc.getLineNumber() ), static_cast<int>( exc.getColumnNumber() ) ) );
 }
 
 void XMLLoad::processElement( const std::string& name, const std::string& prefix, const std::string& localName )
@@ -473,7 +474,7 @@ void XMLLoad::setValueFromId( const std::shared_ptr<EObject>& eObject,
 
 std::string XMLLoad::getLocation() const
 {
-    return locator_ && locator_->getSystemId() ? utf16_to_utf8( locator_->getSystemId() ) : resource_.getURI().toString();
+    return locator_ && locator_->getSystemId() ? cStr( locator_->getSystemId() ).getPtr() : resource_.getURI().toString();
 }
 
 int XMLLoad::getLineNumber() const
@@ -621,15 +622,15 @@ void XMLLoad::handleAttributes( const std::shared_ptr<EObject>& eObject )
     {
         for( int i = 0; i < attributes_->getLength(); ++i )
         {
-            auto name = utf16_to_utf8( attributes_->getQName( i ) );
-            auto value = utf16_to_utf8( attributes_->getValue( i ) );
+            std::string name = cStr( attributes_->getQName( i ) ).getPtr();
+            std::string value = cStr( attributes_->getValue( i ) ).getPtr();
             if( name == HREF )
                 handleProxy( eObject, value );
             else if( notFeatures_.find( name ) == notFeatures_.end() )
             {
                 if( isNamespaceAware_ )
                 {
-                    auto uri = utf16_to_utf8( attributes_->getURI( i ) );
+                    std::string uri = cStr( attributes_->getURI( i ) ).getPtr();
                     if( uri != XSI_URI )
                         setAttributeValue( eObject, name, value );
                 }
@@ -645,7 +646,7 @@ std::string XMLLoad::getXSIType() const
     using namespace utf16;
     auto xsiType
         = isNamespaceAware_ ? ( attributes_ ? attributes_->getValue( XSI_URI, TYPE ) : attributes_->getValue( TYPE_ATTRIB ) ) : nullptr;
-    return xsiType ? utf16_to_utf8( xsiType ) : "";
+    return xsiType ? cStr( xsiType ).getPtr() : "";
 }
 
 void XMLLoad::handleNamespaces()
@@ -656,8 +657,8 @@ void XMLLoad::handleNamespaces()
         for( int i = 0; i < attributes_->getLength(); ++i )
         {
 
-            auto name = utf16_to_utf8( attributes_->getQName( i ) );
-            auto value = utf16_to_utf8( attributes_->getValue( i ) );
+            std::string name = cStr( attributes_->getQName( i ) ).getPtr();
+            std::string value = cStr( attributes_->getValue( i ) ).getPtr();
             if( name.find( XML_NS ) != -1 )
                 handleNamespace( name.substr( 6 ), value );
             else if( name == SCHEMA_LOCATION_ATTRIB )
@@ -681,11 +682,11 @@ void XMLLoad::handleSchemaLocation()
     {
         auto xsiSchemaLocation = attributes_->getValue( XSI_URI, SCHEMA_LOCATION );
         if( xsiSchemaLocation )
-            handleXSISchemaLocation( utf16_to_utf8( xsiSchemaLocation ) );
+            handleXSISchemaLocation( cStr( xsiSchemaLocation ).getPtr() );
 
         auto xsiNoNamespaceSchemaLocation = attributes_->getValue( XSI_URI, NO_NAMESPACE_SCHEMA_LOCATION );
         if( xsiNoNamespaceSchemaLocation )
-            handleXSINoNamespaceSchemaLocation( utf16_to_utf8( xsiNoNamespaceSchemaLocation ) );
+            handleXSINoNamespaceSchemaLocation( cStr( xsiNoNamespaceSchemaLocation ).getPtr() );
     }
 }
 
